@@ -35,3 +35,28 @@ function matrix:rot90(k)
 		return output:rot90(k - 1)
 	end
 end
+function matrix:intersection(other, spos, opos, comparison)
+    for j in ipairs(self) do
+        for i in ipairs(self[j]) do
+            local si = spos[1] + (i - 1)
+            local sj = spos[2] + (j - 1)
+            local oi = opos[1] + (i - 1)
+            local oj = opos[2] + (j - 1)
+            local continue = false
+            if si < 1 or sj < 1 or oi < 1 or oj < 1 then
+                continue = true
+            end
+            if si > #other[1] or sj > #other or oi > #self[1] or oj > #self then
+                continue = true
+            end
+            if not continue then
+                local es = self[oj][oi]
+                local eo = other[sj][si]
+                if comparison(es, eo) then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end

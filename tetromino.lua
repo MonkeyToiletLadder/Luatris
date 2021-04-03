@@ -6,6 +6,7 @@
 ]]
 
 require "matrix"
+require "vector"
 
 local tetris = {}
 
@@ -179,7 +180,12 @@ tetris.directions = {
 }
 
 tetris.tetromino = {
-
+    bounds = {
+        lowest = 1,
+        highest = 2,
+        leftmost = 3,
+        rightmost = 4,
+    }
 }
 tetris.tetromino.__index = tetris.tetromino
 function tetris.tetromino.new(
@@ -204,5 +210,219 @@ function tetris.tetromino.new(
 	}
 	return setmetatable(tetromino, tetris.tetromino)
 end
+function tetris.tetromino:get_lower_bounds(rotation)
+    return self.field.height - boundaries[self.shape][rotation][self.bounds.lowest]
+end
+function tetris.tetromino:get_upper_bounds(rotation)
+    return 1 - boundaries[self.shape][rotation][self.bounds.highest]
+end
+function tetris.tetromino:get_left_bounds(rotation)
+    return 1 - boundaries[self.shape][rotation][self.bounds.leftmost]
+end
+function tetris.tetromino:get_right_bounds(rotation)
+    return self.field.width - boundaries[self.shape][rotation][self.bounds.rightmost]
+end
+function tetris.tetromino:get_rotation()
+    return self.rotation
+end
+function tetris.tetromino:get_next_rotation(direction)
+    rotation = self.rotation
+    if direction == tetris.directions.left then
+        rotation = rotation - 1
+    elseif direction == tetris.directions.right then
+        rotation = rotation + 1
+    end
+    rotation = rotation % 4 ~= 0 and rotation % 4 or 0
+    if rotation < 1 then rotation = rotation + 4
+    return rotation
+end
+function tetris.tetromino:set_next_rotation(direction)
+    self.rotation = self:get_next_rotation()
+end
+function tetris.tetromino:get_wallkicktests(direction)
+    rotation = self:get_next_rotation(direction)
+    local tests = 1
+    if self.rotation == 1 and rotation == 2 then
+        tests = 1
+    elseif self.rotation == 2 and rotation == 1 then
+        tests = 2
+    elseif self.rotation == 2 and rotation == 3 then
+        tests = 3
+    elseif self.rotation == 3 and rotation == 2 then
+        tests = 4
+    elseif self.rotation == 3 and rotation == 4 then
+        tests = 5
+    elseif self.rotation == 4 and rotation == 3 then
+        tests = 6
+    elseif self.rotation == 4 and rotation == 1 then
+        tests = 7
+    elseif self.rotation == 1 and rotation == 4 then
+        tests = 8
+    end
 
+    if self.shape == tetris.shapes.o then
+        return {}
+    end
+    if self.shape == tetris.shapes.i then
+        return wallkicktests_i[tests]
+    end
+
+    return wallkicktests_jlstz[tests]
+end
+function tetris.tetromino:drop()
+    test = {
+        self.position[1],
+        self.position[2],
+    }
+    test[2] = math.floor(test[2] + 1)
+
+    should_drop = true
+
+    if test[2] > self:get_lower_bounds(self.rotation) then
+        should_drop = false
+        if not self.touching then
+            self.timer = "unimplemented"
+            self.touching = true
+        end
+    end
+
+    local state = rotations[self.rotation]
+    local overlap = matrix.instersect(state, self.field, test, vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    if overlap then
+        if not self.touching then
+            self.timer = "unimplemented"
+            self.touching = true
+        end
+        should_drop = false
+    end
+
+    if should_drop then
+        -- The speed of a tetromino is maxed at 1 to prevent complex collision logic
+        -- Basically the tetromino would need to be tested at all the points between the next state and the starting state
+        -- The speed of a tetromino probably doesnt need to exceed 1 anyways
+        self.position[2] = self.position[2] + math.min(self.velocity * self.modifier, 1)
+    end
+
+    -- test below the piece again to see if its touching the floor or another tetromino
+    if test[2] > self:get_lower_bounds(self.rotation) then
+        if not self.touching then
+            self.timer = "unimplemented"
+            self.touching = true
+        end
+    end
+
+    state = rotations[self.rotation]
+    overlap = matrix.instersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    if overlap then
+        if not self.touching then
+            self.timer = "unimplemented"
+            self.touching = true
+        end
+    end
+end
+function tetris.tetromino:rotate(direction)
+    if self.locks <= 0 then
+        return
+    end
+
+    local rotation = self:get_next_rotation(direction)
+    local state = rotations[rotation]
+    local tests = self:get_wallkicktests(direction)
+
+    -- Get the pairs of test coordinates
+    for i = 1, #tests, 1 do
+        local j = i + 1
+        test = {
+            self.position[1],
+            self.position[2],
+        }
+        test[1] = test[1] + tests[i]
+        test[2] = test[2] + tests[j]
+
+        local should_move = true
+        if test[1] < self:get_leftmost(rotation) then
+            should_move = false
+        end
+        if test[1] > self:get_rightmost(rotation) then
+            should_move = false
+        end
+        if test[2] > self:get_lowest(rotation) then
+            should_move = false
+        end
+
+        local overlap = matrix.instersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+
+        if overlap then
+            should_move = false
+        end
+
+        if should_move then
+            if self.touching then
+                self.locks = self.locks - 1
+                self.touching = false
+                self.timer = 0
+            end
+            self.position[1] = test[1]
+            self.position[2] = test[2]
+            return
+        end
+    end
+end
+function tetris.tetromino:move(direction)
+    if self.locks <= 0 then
+        return
+    end
+
+    local step = 0
+
+    if direction == tetris.directions.left then
+        step = -1
+    elseif direction == tetris.directions.right then
+        step = 1
+    end
+
+    local rotation = self:get_rotation()
+
+    local test = {
+        self.position[1],
+        self.position[2],
+    }
+    test[1] = test[1] + step
+    if test[1] < self:get_leftmost(rotation) then
+        return
+    end
+    if test[1] > self:get_rightmost(rotation) then
+        return
+    end
+
+    local state = rotations[rotation]
+
+    local overlap = matrix.instersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+
+    if overlap then
+        return
+    end
+
+    if self.touching then
+        self.locks = self.locks - 1
+		self.touching = false
+		self.timer = 0
+    end
+    self.position[1] = test[1]
+    self.position[2] = test[2]
+end
+function tetris.tetromino:insert()
+	local state = self:get_state()
+
+	local k = math.floor(self.position[1]) - 1
+	local l = math.floor(self.position[2]) - 1
+
+	for j=1,#state,1 do
+		for i=1,#state[j],1 do
+			if state[j][i] ~= 0 then
+				self.field[l + j][k + i] = self.shape
+			end
+		end
+	end
+end
 return tetris
