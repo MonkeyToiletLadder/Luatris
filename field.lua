@@ -32,15 +32,12 @@ function field:clear_row(row)
         self[row][i] = 0
     end
 end
-function field:drop()
-    local spaces = {}
-    for j = #self, 1, -1 do
+function field:drop(row)
+    for j = row, 1, -1 do
         for i in ipairs(self[j]) do
-            if self[j][i] == 0 then
-                spaces[i] = (spaces[i] or 0) + 1
-            else
+            if self[j][i] ~= 0 then
                 local temp = self[j][i]
-                self[j + spaces[i]][i] = temp
+                self[j + 1][i] = temp
                 self[j][i] = 0
             end
         end
@@ -63,5 +60,5 @@ f = field.new(10,40)
 f[1][1] = 1
 f[5][1] = 1
 mat_print(f)
-f:drop()
+f:drop(1)
 mat_print(f)
