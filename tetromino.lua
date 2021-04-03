@@ -78,6 +78,19 @@ local function get_rightmost(bitarray)
     return rightmost
 end
 
+local function get_boundaries(bitarrays)
+    local boundaries = {}
+    for i in ipairs(bitarrays) do
+        boundaries[i] = {
+            get_lowest(bitarrays[i]),
+            get_highest(bitarrays[i]),
+            get_leftmost(bitarrays[i]),
+            get_rightmost(bitarrays[i])
+        }
+    end
+    return boundaries
+end
+
 local bitarrays = {
     {
 		{0,0,0,0},
@@ -126,6 +139,16 @@ local rotations = {
     get_rotations(bitarrays[tetris.shapes.s]),
     get_rotations(bitarrays[tetris.shapes.t]),
     get_rotations(bitarrays[tetris.shapes.z]),
+}
+
+local boundaries = {
+    get_boundaries(rotations[tetris.shapes.i]),
+    get_boundaries(rotations[tetris.shapes.j]),
+    get_boundaries(rotations[tetris.shapes.l]),
+    get_boundaries(rotations[tetris.shapes.o]),
+    get_boundaries(rotations[tetris.shapes.s]),
+    get_boundaries(rotations[tetris.shapes.t]),
+    get_boundaries(rotations[tetris.shapes.z]),
 }
 
 local wallkicktests_jlstz = {
