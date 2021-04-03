@@ -2,21 +2,14 @@
 
 local tetris = require "tetromino"
 require "vector"
+require "field"
 
-field = {
-	width = 10,
-	height = 40
-}
+
+field = field.new(10, 40)
 
 new_tetromino = true
 tetromino = nil
 math.randomseed(love.timer.getTime())
-for j=1,field.height,1 do
-	field[j] = {}
-	for i=1,field.width,1 do
-		field[j][i] = 0
-	end
-end
 
 function love.draw()
 	love.graphics.clear(0,0,0)
@@ -93,6 +86,18 @@ function love.update()
 	if tetromino.touching and love.timer.getTime() - tetromino.timer > tetromino.delay then
 		tetromino:insert()
 		new_tetromino = true
+		local rows = 0
+		local lowest = 0
+		for j = 1, field.height, 1 do
+			if field:is_row_full(j) then
+				field:clear_row(j)
+				rows = rows + 1
+				if j > lowest then lowest = j end
+			end
+		end
+		if rows ~= 0 then
+			field:drop(lowest, rows)
+		end
 	end
 end
 

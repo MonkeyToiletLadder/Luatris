@@ -32,12 +32,13 @@ function field:clear_row(row)
         self[row][i] = 0
     end
 end
-function field:drop(row)
+function field:drop(row, k)
+    k = k or 1
     for j = row, 1, -1 do
         for i in ipairs(self[j]) do
             if self[j][i] ~= 0 then
                 local temp = self[j][i]
-                self[j + 1][i] = temp
+                self[math.min(j + k, self.height)][i] = temp
                 self[j][i] = 0
             end
         end
@@ -60,5 +61,5 @@ f = field.new(10,40)
 f[1][1] = 1
 f[5][1] = 1
 mat_print(f)
-f:drop(1)
+f:drop(1, 2)
 mat_print(f)
