@@ -65,6 +65,12 @@ function love.draw()
 			end
 		end
 	end
+	for j=1,field.height,1 do
+		for i=1,field.width,1 do
+			love.graphics.setColor(0,0,0)
+			love.graphics.rectangle("line", (i - 1) * 25, j * 25 - 25 * 20, 25, 25)
+		end
+	end
 end
 love.keyboard.setKeyRepeat(true)
 function love.update()
@@ -88,12 +94,8 @@ function love.update()
 		for j = 1, field.height, 1 do
 			if field:is_row_full(j) then
 				field:clear_row(j)
-				rows = rows + 1
-				if j > lowest then lowest = j end
+				field:drop(j, 1)
 			end
-		end
-		if rows ~= 0 then
-			field:drop(lowest, rows)
 		end
 	end
 end
