@@ -44,22 +44,3 @@ function field:drop(row, k)
         end
     end
 end
-
-function mat_print(m)
-	io.write("[\n")
-	for i, v in ipairs(m) do
-		io.write("\t[")
-		for i, v in ipairs(v) do
-			io.write(v..", ")
-		end
-		io.write("]\n")
-	end
-	io.write("]\n")
-end
-
-f = field.new(10,40)
-f[1][1] = 1
-f[5][1] = 1
-mat_print(f)
-f:drop(1, 2)
-mat_print(f)

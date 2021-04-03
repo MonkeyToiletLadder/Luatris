@@ -1,5 +1,3 @@
-#!/usr/local/bin/lua
-
 local tetris = require "tetromino"
 require "vector"
 require "field"
@@ -59,7 +57,6 @@ function love.draw()
 	else
 		color = {1,1,1}
 	end
-	print(tetromino.locks)
 	love.graphics.setColor(unpack(color))
 	for j=1,#state,1 do
 		for i=1,#state[j],1 do
@@ -72,7 +69,7 @@ end
 love.keyboard.setKeyRepeat(true)
 function love.update()
 	if new_tetromino then
-		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{4, 21}, 1, .05, 4, .75)
+		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{4, 21}, 1, .05, 8, .75)
 		new_tetromino = false
 	end
 	if tetromino then
