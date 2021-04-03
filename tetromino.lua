@@ -284,7 +284,7 @@ function tetris.tetromino:drop()
     if test[2] > self:get_lower_bound(self.rotation) then
         should_drop = false
         if not self.touching then
-            self.timer = "unimplemented"
+            self.timer = love.timer.getTime()
             self.touching = true
         end
     end
@@ -293,7 +293,7 @@ function tetris.tetromino:drop()
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
-            self.timer = "unimplemented"
+            self.timer = love.timer.getTime()
             self.touching = true
         end
         should_drop = false
@@ -315,7 +315,7 @@ function tetris.tetromino:drop()
     -- test below the piece again to see if its touching the floor or another tetromino
     if test[2] > self:get_lower_bound(self.rotation) then
         if not self.touching then
-            self.timer = "unimplemented"
+            self.timer = love.timer.getTime()
             self.touching = true
         end
     end
@@ -323,7 +323,7 @@ function tetris.tetromino:drop()
     overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
-            self.timer = "unimplemented"
+            self.timer = love.timer.getTime()
             self.touching = true
         end
     end

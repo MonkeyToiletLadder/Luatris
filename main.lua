@@ -10,7 +10,7 @@ field = {
 
 new_tetromino = true
 tetromino = nil
-
+math.randomseed(love.timer.getTime())
 for j=1,field.height,1 do
 	field[j] = {}
 	for i=1,field.width,1 do
@@ -66,7 +66,6 @@ function love.draw()
 	else
 		color = {1,1,1}
 	end
-	print(tetromino.locks)
 	love.graphics.setColor(unpack(color))
 	for j=1,#state,1 do
 		for i=1,#state[j],1 do
@@ -79,13 +78,13 @@ end
 love.keyboard.setKeyRepeat(false)
 function love.update()
 	if new_tetromino then
-		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{1, 21}, 4, .1, 4, .01)
+		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{1, 21}, 4, .05, 4, .60)
 		new_tetromino = false
 	end
 	if tetromino then
 		tetromino:drop()
 	end
-	if tetromino.locks <= 0 and tetromino.touching then
+	if tetromino.touching and love.timer.getTime() - tetromino.timer > tetromino.delay then
 		tetromino:insert()
 		new_tetromino = true
 	end
