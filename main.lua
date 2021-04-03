@@ -32,9 +32,9 @@ function love.draw()
 				color = {1,1,1}
 			end
 			love.graphics.setColor(unpack(color))
-			love.graphics.rectangle("fill", i * 25, j * 25 - 25 * 20, 25, 25)
+			love.graphics.rectangle("fill", (i - 1) * 25, j * 25 - 25 * 20, 25, 25)
 			love.graphics.setColor(0,0,0)
-			love.graphics.rectangle("line", i * 25, j * 25 - 25 * 20, 25, 25)
+			love.graphics.rectangle("line", (i - 1) * 25, j * 25 - 25 * 20, 25, 25)
 		end
 	end
 	local position = tetromino.position
@@ -61,7 +61,7 @@ function love.draw()
 	for j=1,#state,1 do
 		for i=1,#state[j],1 do
 			if state[j][i] ~= 0 then
-				love.graphics.rectangle("fill", position[1] * 25 + (i - 1)*25, math.floor(position[2]) * 25 + (j - 1)*25 - 25 * 20,25,25)
+				love.graphics.rectangle("fill", position[1] * 25 + (i - 2)*25, math.floor(position[2]) * 25 + (j - 1)*25 - 25 * 20,25,25)
 			end
 		end
 	end
@@ -69,7 +69,7 @@ end
 love.keyboard.setKeyRepeat(true)
 function love.update()
 	if new_tetromino then
-		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{4, 21}, 1, .05, 8, .75)
+		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{4, 17}, 1, .05, 8, .75)
 		new_tetromino = false
 	end
 	if tetromino then
