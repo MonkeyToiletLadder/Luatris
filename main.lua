@@ -66,6 +66,7 @@ function love.draw()
 	else
 		color = {1,1,1}
 	end
+	print(tetromino.locks)
 	love.graphics.setColor(unpack(color))
 	for j=1,#state,1 do
 		for i=1,#state[j],1 do
@@ -78,23 +79,26 @@ end
 love.keyboard.setKeyRepeat(false)
 function love.update()
 	if new_tetromino then
-		tetromino = tetris.tetromino.new(field, 1, vector.new{1, 21}, 4, .1, 4, .01)
+		tetromino = tetris.tetromino.new(field, math.random(1,7), vector.new{1, 21}, 4, .1, 4, .01)
 		new_tetromino = false
 	end
 	if tetromino then
-		if love.keyboard.isDown("left") then
-			tetromino:move(tetris.direction.left)
-		elseif love.keyboard.isDown("right") then
-			tetromino:move(tetris.direction.right)
-		elseif love.keyboard.isDown("a") then
-			tetromino:rotate(tetris.direction.left)
-		elseif love.keyboard.isDown("s") then
-			tetromino:rotate(tetris.direction.right)
-		end
 		tetromino:drop()
 	end
-	if tetromino.touching then
+	if tetromino.locks <= 0 and tetromino.touching then
 		tetromino:insert()
 		new_tetromino = true
+	end
+end
+
+function love.keypressed(key, scancode, isrepeat)
+	if key == "left" then
+		tetromino:move(tetris.directions.left)
+	elseif key == "right" then
+		tetromino:move(tetris.directions.right)
+	elseif key == "a" then
+		tetromino:rotate(tetris.directions.left)
+	elseif key == "s" then
+		tetromino:rotate(tetris.directions.right)
 	end
 end

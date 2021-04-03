@@ -35,7 +35,7 @@ function matrix:rot90(k)
 		return output:rot90(k - 1)
 	end
 end
-function matrix:intersection(other, spos, opos, comparison)
+function matrix:intersect(other, spos, opos, comparison)
     for j in ipairs(self) do
         for i in ipairs(self[j]) do
             local si = spos[1] + (i - 1)
