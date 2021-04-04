@@ -208,7 +208,17 @@ function tetris.tetromino.new(
 		delay = delay,
 		timer = 0
 	}
-	return setmetatable(tetromino, tetris.tetromino)
+	local tetromino = setmetatable(tetromino, tetris.tetromino)
+
+    local state = rotations[shape][rotation]
+
+    local overlap = matrix.intersect(state, tetromino.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+
+    if overlap then
+        return false
+    else
+        return tetromino
+    end
 end
 function tetris.tetromino:get_lower_bound(rotation)
     return self.field.height - boundaries[self.shape][rotation][self.bounds.lowest]
