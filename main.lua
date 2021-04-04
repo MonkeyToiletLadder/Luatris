@@ -1,3 +1,15 @@
+--[[
+    tetromino.lua
+    luatris version 0.1.0
+    author: vaxeral
+    april 2 2021
+
+	highscores
+	mason 324
+	flynn 22
+	dylan 145
+]]
+
 local tetris = require "tetromino"
 require "vector"
 require "field"
