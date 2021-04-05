@@ -21,7 +21,7 @@ function field.new(width, height)
 end
 function field:is_row_full(row)
     for i, v in ipairs(self[row]) do
-        if v == 0 then
+        if v <= 0 then
             return false
         end
     end
