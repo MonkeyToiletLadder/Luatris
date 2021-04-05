@@ -7,18 +7,18 @@
 	highscores
 	mason 324
 	flynn 22
-	dylan 145
+	dylan 502
 ]]
 
 local tetris = require "tetromino"
 require "vector"
 require "field"
 
-
 field = field.new(10, 40)
 
 new_tetromino = true
 tetromino = nil
+held = nil
 math.randomseed(love.timer.getTime())
 score = 0
 function love.draw()
