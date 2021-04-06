@@ -2,23 +2,11 @@
     tetromino.lua
     luatris version 0.1.0
     author: vaxeral
-    april 2 2021
+    april 6 2021
 ]]
 
 require "matrix"
 require "vector"
-
-local tetris = {}
-
-tetris.shapes = {
-    i = 1,
-    j = 2,
-    l = 3,
-    o = 4,
-    s = 5,
-    t = 6,
-    z = 7,
-}
 
 local function get_rotations(bitarray)
 	bitarray = matrix.new(bitarray)
@@ -30,7 +18,6 @@ local function get_rotations(bitarray)
 	}
 	return rotations
 end
-
 local function get_lowest(bitarray)
     lowest = nil
     for j in ipairs(bitarray) do
@@ -42,7 +29,6 @@ local function get_lowest(bitarray)
     end
     return lowest
 end
-
 local function get_highest(bitarray)
     highest = nil
     for j in ipairs(bitarray) do
@@ -54,7 +40,6 @@ local function get_highest(bitarray)
     end
     return highest
 end
-
 local function get_leftmost(bitarray)
     leftmost = nil
     for j in ipairs(bitarray) do
@@ -66,7 +51,6 @@ local function get_leftmost(bitarray)
     end
     return leftmost
 end
-
 local function get_rightmost(bitarray)
     rightmost = nil
     for j in ipairs(bitarray) do
@@ -78,7 +62,6 @@ local function get_rightmost(bitarray)
     end
     return rightmost
 end
-
 local function get_boundaries(bitarrays)
     local boundaries = {}
     for i in ipairs(bitarrays) do
@@ -92,7 +75,28 @@ local function get_boundaries(bitarrays)
     return boundaries
 end
 
-local bitarrays = {
+tetromino = {}
+tetromino.__index = tetromino
+tetromino.shape = {
+    i = 1,
+    j = 2,
+    l = 3,
+    o = 4,
+    s = 5,
+    t = 6,
+    z = 7,
+}
+tetromino.bound = {
+    bottom = 1,
+    top = 2,
+    left = 3,
+    right = 4,
+}
+tetromino.direction = {
+    left = 1,
+    right = 2,
+}
+tetromino.bitarrays = {
     {
 		{0,0,0,0},
 		{1,1,1,1},
@@ -129,30 +133,27 @@ local bitarrays = {
 		{1,1,0},
 		{0,1,1},
 		{0,0,0},
-	}
+	},
 }
-
-local rotations = {
-    get_rotations(bitarrays[tetris.shapes.i]),
-    get_rotations(bitarrays[tetris.shapes.j]),
-    get_rotations(bitarrays[tetris.shapes.l]),
-    get_rotations(bitarrays[tetris.shapes.o]),
-    get_rotations(bitarrays[tetris.shapes.s]),
-    get_rotations(bitarrays[tetris.shapes.t]),
-    get_rotations(bitarrays[tetris.shapes.z]),
+tetromino.rotations = {
+    get_rotations(tetromino.bitarrays[tetromino.shape.i]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.j]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.l]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.o]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.s]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.t]),
+    get_rotations(tetromino.bitarrays[tetromino.shape.z]),
 }
-
-local boundaries = {
-    get_boundaries(rotations[tetris.shapes.i]),
-    get_boundaries(rotations[tetris.shapes.j]),
-    get_boundaries(rotations[tetris.shapes.l]),
-    get_boundaries(rotations[tetris.shapes.o]),
-    get_boundaries(rotations[tetris.shapes.s]),
-    get_boundaries(rotations[tetris.shapes.t]),
-    get_boundaries(rotations[tetris.shapes.z]),
+tetromino.boundaries = {
+    get_boundaries(tetromino.rotations[tetromino.shape.i]),
+    get_boundaries(tetromino.rotations[tetromino.shape.j]),
+    get_boundaries(tetromino.rotations[tetromino.shape.l]),
+    get_boundaries(tetromino.rotations[tetromino.shape.o]),
+    get_boundaries(tetromino.rotations[tetromino.shape.s]),
+    get_boundaries(tetromino.rotations[tetromino.shape.t]),
+    get_boundaries(tetromino.rotations[tetromino.shape.z]),
 }
-
-local wallkicktests_jlstz = {
+tetromino.wallkicktests_jlstz = {
     { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
     { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
     { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
@@ -162,8 +163,7 @@ local wallkicktests_jlstz = {
     { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
     { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
 }
-
-local wallkicktests_i = {
+tetromino.wallkicktests_i = {
     { 0, 0,-2, 0, 1, 0,-2,-1, 1, 2},
     { 0, 0, 2, 0,-1, 0, 2, 1,-1,-2},
     { 0, 0,-1, 0, 2, 0,-1, 2, 2,-1},
@@ -174,21 +174,7 @@ local wallkicktests_i = {
     { 0, 0,-1, 0, 2, 0,-1, 2, 2,-1},
 }
 
-tetris.directions = {
-    left = 1,
-    right = 2,
-}
-
-tetris.tetromino = {
-    bounds = {
-        lowest = 1,
-        highest = 2,
-        leftmost = 3,
-        rightmost = 4,
-    }
-}
-tetris.tetromino.__index = tetris.tetromino
-function tetris.tetromino.new(
+function tetromino.new(
     field,
     shape,
     position,
@@ -196,7 +182,7 @@ function tetris.tetromino.new(
     velocity,
     locks,
     delay)
-	local tetromino = {
+	local _tetromino = {
 		field = field,
 		shape = shape,
 		position = position,
@@ -208,51 +194,51 @@ function tetris.tetromino.new(
 		delay = delay,
 		timer = 0
 	}
-	local tetromino = setmetatable(tetromino, tetris.tetromino)
+	local tetromino = setmetatable(_tetromino, tetromino)
 
-    local state = rotations[shape][rotation]
+    local state = tetromino.rotations[shape][rotation]
 
-    local overlap = matrix.intersect(state, tetromino.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    local overlap = matrix.intersect(state, _tetromino.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
     if overlap then
         return false
     else
-        return tetromino
+        return _tetromino
     end
 end
-function tetris.tetromino:get_lower_bound(rotation)
-    return self.field.height - boundaries[self.shape][rotation][self.bounds.lowest]
+function tetromino:get_lower_bound(rotation)
+    return self.field.height - tetromino.boundaries[self.shape][rotation][tetromino.bound.bottom]
 end
-function tetris.tetromino:get_upper_bound(rotation)
-    return 1 - boundaries[self.shape][rotation][self.bounds.highest]
+function tetromino:get_upper_bound(rotation)
+    return 1 - tetromino.boundaries[self.shape][rotation][tetromino.bound.top]
 end
-function tetris.tetromino:get_left_bound(rotation)
-    return 1 - boundaries[self.shape][rotation][self.bounds.leftmost]
+function tetromino:get_left_bound(rotation)
+    return 1 - tetromino.boundaries[self.shape][rotation][tetromino.bound.left]
 end
-function tetris.tetromino:get_right_bound(rotation)
-    return self.field.width - boundaries[self.shape][rotation][self.bounds.rightmost]
+function tetromino:get_right_bound(rotation)
+    return self.field.width - tetromino.boundaries[self.shape][rotation][tetromino.bound.right]
 end
-function tetris.tetromino:get_rotation()
+function tetromino:get_rotation()
     return self.rotation
 end
-function tetris.tetromino:get_next_rotation(direction)
+function tetromino:get_next_rotation(direction)
     rotation = self.rotation
-    if direction == tetris.directions.left then
+    if direction == tetromino.direction.left then
         rotation = rotation - 1
-    elseif direction == tetris.directions.right then
+    elseif direction == tetromino.direction.right then
         rotation = rotation + 1
     end
     rotation = rotation % 4 ~= 0 and rotation % 4 or 0
     if rotation < 1 then rotation = rotation + 4 end
     return rotation
 end
-function tetris.tetromino:get_state()
-    return rotations[self.shape][self:get_rotation()]
+function tetromino:get_state()
+    return tetromino.rotations[self.shape][self:get_rotation()]
 end
-function tetris.tetromino:set_next_rotation(direction)
+function tetromino:set_next_rotation(direction)
     self.rotation = self:get_next_rotation(direction)
 end
-function tetris.tetromino:get_wallkicktests(direction)
+function tetromino:get_wallkicktests(direction)
     rotation = self:get_next_rotation(direction)
     local tests = 1
     if self.rotation == 1 and rotation == 2 then
@@ -273,16 +259,16 @@ function tetris.tetromino:get_wallkicktests(direction)
         tests = 8
     end
 
-    if self.shape == tetris.shapes.o then
+    if self.shape == tetromino.shape.o then
         return {}
     end
-    if self.shape == tetris.shapes.i then
-        return wallkicktests_i[tests]
+    if self.shape == tetromino.shape.i then
+        return tetromino.wallkicktests_i[tests]
     end
 
-    return wallkicktests_jlstz[tests]
+    return tetromino.wallkicktests_jlstz[tests]
 end
-function tetris.tetromino:drop()
+function tetromino:drop()
     local test = vector.new{
         self.position[1],
         self.position[2],
@@ -299,7 +285,7 @@ function tetris.tetromino:drop()
         end
     end
 
-    local state = rotations[self.shape][self.rotation]
+    local state = tetromino.rotations[self.shape][self.rotation]
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
@@ -338,13 +324,13 @@ function tetris.tetromino:drop()
         end
     end
 end
-function tetris.tetromino:rotate(direction)
+function tetromino:rotate(direction)
     if self.locks <= 0 then
         return
     end
 
     local rotation = self:get_next_rotation(direction)
-    local state = rotations[self.shape][rotation]
+    local state = tetromino.rotations[self.shape][rotation]
     local tests = self:get_wallkicktests(direction)
 
     -- Get the pairs of test coordinates
@@ -387,16 +373,16 @@ function tetris.tetromino:rotate(direction)
         end
     end
 end
-function tetris.tetromino:move(direction)
+function tetromino:move(direction)
     if self.locks <= 0 then
         return
     end
 
     local step = 0
 
-    if direction == tetris.directions.left then
+    if direction == tetromino.direction.left then
         step = -1
-    elseif direction == tetris.directions.right then
+    elseif direction == tetromino.direction.right then
         step = 1
     end
 
@@ -414,7 +400,7 @@ function tetris.tetromino:move(direction)
         return
     end
 
-    local state = rotations[self.shape][rotation]
+    local state = tetromino.rotations[self.shape][rotation]
 
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
@@ -430,9 +416,9 @@ function tetris.tetromino:move(direction)
     self.position[1] = test[1]
     self.position[2] = test[2]
 end
-function tetris.tetromino:insert()
+function tetromino:insert()
 	local rotation = self:get_rotation()
-    local state = rotations[self.shape][rotation]
+    local state = tetromino.rotations[self.shape][rotation]
 
 	local k = math.floor(self.position[1]) - 1
 	local l = math.floor(self.position[2]) - 1
@@ -445,5 +431,3 @@ function tetris.tetromino:insert()
 		end
 	end
 end
-
-return tetris
