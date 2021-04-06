@@ -5,7 +5,7 @@
     april 1 2021
 ]]
 
-matrix = {}
+local matrix = {}
 matrix.__index = matrix
 function matrix.new(_matrix)
     return setmetatable(_matrix, matrix)
@@ -60,3 +60,5 @@ function matrix:intersect(other, spos, opos, comparison)
     end
     return false
 end
+
+return matrix

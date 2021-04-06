@@ -5,8 +5,8 @@
     april 6 2021
 ]]
 
-require "matrix"
-require "vector"
+local matrix = require "matrix"
+local vector = require "vector"
 
 local function get_rotations(bitarray)
 	bitarray = matrix.new(bitarray)
@@ -75,7 +75,7 @@ local function get_boundaries(bitarrays)
     return boundaries
 end
 
-tetromino = {}
+local tetromino = {}
 tetromino.__index = tetromino
 tetromino.shape = {
     i = 1,
@@ -222,7 +222,7 @@ function tetromino:get_rotation()
     return self.rotation
 end
 function tetromino:get_next_rotation(direction)
-    rotation = self.rotation
+    local rotation = self.rotation
     if direction == tetromino.direction.left then
         rotation = rotation - 1
     elseif direction == tetromino.direction.right then
@@ -239,7 +239,7 @@ function tetromino:set_next_rotation(direction)
     self.rotation = self:get_next_rotation(direction)
 end
 function tetromino:get_wallkicktests(direction)
-    rotation = self:get_next_rotation(direction)
+    local rotation = self:get_next_rotation(direction)
     local tests = 1
     if self.rotation == 1 and rotation == 2 then
         tests = 1
@@ -275,7 +275,7 @@ function tetromino:drop()
     }
     test[2] = math.floor(test[2] + 1)
 
-    should_drop = true
+    local should_drop = true
 
     if test[2] > self:get_lower_bound(self.rotation) then
         should_drop = false
@@ -431,3 +431,5 @@ function tetromino:insert()
 		end
 	end
 end
+
+return tetromino

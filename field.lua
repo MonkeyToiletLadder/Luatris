@@ -5,7 +5,7 @@
     april 1 2021
 ]]
 
-field = {}
+local field = {}
 field.__index = field
 function field.new(width, height)
     local _field = {}
@@ -44,3 +44,5 @@ function field:drop(row, k)
         end
     end
 end
+
+return field

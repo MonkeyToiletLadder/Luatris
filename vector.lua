@@ -5,7 +5,7 @@
     april 1 2021
 ]]
 
-vector = {}
+local vector = {}
 vector.__index = vector
 function vector.new(values)
     return setmetatable(values, vector)
@@ -46,3 +46,5 @@ function vector:to_veci()
         math.floor(self[2])
     }
 end
+
+return vector

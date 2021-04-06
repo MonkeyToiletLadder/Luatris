@@ -10,9 +10,9 @@
 	dylan 502
 ]]
 
-require "tetromino"
-require "vector"
-require "field"
+tetromino = require "tetromino"
+vector = require "vector"
+field = require "field"
 
 field = field.new(10, 40)
 
