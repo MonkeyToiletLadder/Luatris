@@ -96,6 +96,15 @@ tetromino.direction = {
     left = 1,
     right = 2,
 }
+tetromino.colors = {
+    {0/255,255/255,255/255},
+    {0/255,0/255,255/255},
+    {255/255,128/255,0/255},
+    {255/255,255/255,0/255},
+    {0/255,255/255,0/255},
+    {255/255,0/255,255/255},
+    {255/255,0/255,0/255},
+}
 tetromino.bitarrays = {
     {
 		{0,0,0,0},
@@ -430,6 +439,20 @@ function tetromino:insert()
 			end
 		end
 	end
+end
+function tetromino:draw()
+    local blocksize = self.field.blocksize
+    local offset = self.field.position
+    local state = tetromino.rotations[self.shape][self.rotation]
+    local position = self.position
+    love.graphics.setColor(tetromino.colors[self.shape])
+    for j in ipairs(state) do
+        for i in ipairs(state[j]) do
+            if state[j][i] ~= 0 then
+                love.graphics.rectangle("fill", offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize, blocksize, blocksize)
+            end
+        end
+    end
 end
 
 return tetromino

@@ -5,10 +5,16 @@
     april 1 2021
 ]]
 
+tetromino = require "tetromino"
+vector = require "vector"
+
 local field = {}
 field.__index = field
-function field.new(width, height)
+function field.new(position, blocksize, hidden, width, height)
     local _field = {}
+    _field.position = position - vector.new{0, hidden * blocksize}
+    _field.blocksize = blocksize
+    _field.hidden = hidden or 20
     _field.width = width or 10
     _field.height = height or 40
     for j=1,_field.height,1 do
@@ -43,6 +49,20 @@ function field:drop(row, k)
             end
         end
     end
+end
+function field:draw()
+    local offset = self.position
+	for j=1,self.height,1 do
+		for i=1,self.width,1 do
+			local color = {1,1,1}
+            local shape = self[j][i]
+            color = tetromino.colors[shape] or color
+			love.graphics.setColor(unpack(color))
+			love.graphics.rectangle("fill", offset[1] + (i - 1) * self.blocksize, offset[2] + (j - 1) * self.blocksize, self.blocksize, self.blocksize)
+			love.graphics.setColor(0,0,0)
+			love.graphics.rectangle("line", offset[1] + (i - 1) * self.blocksize, offset[2] + (j - 1) * self.blocksize, self.blocksize, self.blocksize)
+		end
+	end
 end
 
 return field

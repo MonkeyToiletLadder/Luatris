@@ -14,7 +14,7 @@ function vector:__add(other)
     if #self ~= #other then
         error("adding vectors of unequal length")
     end
-    local output = vector.new(table.unpack(self))
+    local output = vector.new{unpack(self)}
     for i, v in ipairs(self) do
         output[i] = v + other[i]
     end
@@ -24,7 +24,7 @@ function vector:__sub(other)
     if #self ~= #other then
         error("subtracting vectors of unequal length")
     end
-    local output = vector.new(table.unpack(self))
+    local output = vector.new{unpack(self)}
     for i, v in ipairs(self) do
         output[i] = v - other[i]
     end
