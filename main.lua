@@ -3,12 +3,12 @@
     luatris version 0.1.0
     author: vaxeral
     april 2 2021
+
+	TODO: Generate pieces methodicaly to let the player win
+	TODO: Use blocks.png
 ]]
 
-vector = require "vector"
 tetris = {
-	tetromino = require "tetromino",
-	field = require "field",
 	game = require "game",
 }
 
@@ -23,7 +23,6 @@ end
 function love.update()
 	game:update()
 end
-
 function love.keypressed(key, scancode, isrepeat)
 	game:on_keypressed(key)
 end

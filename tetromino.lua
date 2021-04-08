@@ -3,8 +3,6 @@
     luatris version 0.1.0
     author: vaxeral
     april 6 2021
-
-	TODO: Generate pieces methodicaly
 ]]
 
 local matrix = require "matrix"
@@ -467,6 +465,7 @@ function tetromino:update()
 			end
 		end
 		self.field.cleared = rows
+		self.onstack = true
 		self.alive = false
 	end
 end
