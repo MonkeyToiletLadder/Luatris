@@ -77,6 +77,10 @@ function game:update()
 	if self.current_tetromino.alive then
 		self.current_tetromino:update()
 	end
+    if self.field.core.cleared ~= 0 then
+        self.score = self.score + math.pow(2, self.field.core.cleared)
+        self.field.core.cleared = 0
+    end
 end
 function game:draw()
 	love.graphics.clear(0,0,0)
@@ -88,7 +92,7 @@ function game:draw()
 	self.field.grid:draw()
 	self.field.border:draw()
 	love.graphics.setColor(1,1,1)
-	love.graphics.print("score: " .. self.score, 0, 25 * 21)
+	love.graphics.print("score: " .. self.score, 0, self.field.core.blocksize * 20)
 end
 
 return game
