@@ -16,7 +16,9 @@ tetris = {
 	field = require "field",
 }
 
-field = tetris.field.new(vector.new{0, 0}, 25, 19, 10, 40)
+field = tetris.field.core.new(vector.new{50, 50}, 12, 19, 10, 40)
+grid = tetris.field.grid.new(field)
+background = tetris.field.background.new(field)
 
 new_tetromino = true
 current_tetromino = nil
@@ -25,10 +27,12 @@ math.randomseed(love.timer.getTime())
 score = 0
 function love.draw()
 	love.graphics.clear(0,0,0)
+	background:draw()
 	field:draw()
 	if current_tetromino then
 		current_tetromino:draw()
 	end
+	grid:draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.print("score: " .. score, 0, 25 * 21)
 end

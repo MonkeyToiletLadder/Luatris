@@ -448,7 +448,7 @@ function tetromino:draw()
     love.graphics.setColor(tetromino.colors[self.shape])
     for j in ipairs(state) do
         for i in ipairs(state[j]) do
-            if state[j][i] ~= 0 then
+            if state[j][i] ~= 0 and j + position[2] - 2 > self.field.hidden then
                 love.graphics.rectangle("fill", offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize, blocksize, blocksize)
             end
         end
