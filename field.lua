@@ -55,9 +55,12 @@ end
 function field.core:get_position()
     return self.position + vector.new{0, self.hidden * self.blocksize}
 end
+function field.core:set_position(position)
+    self.position = position - vector.new{0, self.hidden * self.blocksize}
+end
 function field.core:draw()
     local offset = self.position
-	for j=self.hidden,self.height,1 do
+	for j=self.hidden+1,self.height,1 do
 		for i=1,self.width,1 do
             local shape = self[j][i]
             local color = tetromino.colors[shape]
@@ -100,6 +103,20 @@ function field.background:draw()
     local blocksize = self.core.blocksize
     love.graphics.setColor(1, 1, 1)
     love.graphics.rectangle("fill", position[1], position[2], blocksize * self.core.width, blocksize * (self.core.height - self.core.hidden))
+end
+
+field.border = {}
+field.border.__index = field.border
+function field.border.new(core)
+    local _border = {}
+    _border.core = core
+    return setmetatable(_border, field.border)
+end
+function field.border:draw()
+    local position = self.core:get_position()
+    local blocksize = self.core.blocksize
+    love.graphics.setColor(math.random(255)/255, math.random(255)/255, math.random(255)/255)
+    love.graphics.rectangle("line", position[1], position[2], blocksize * self.core.width, blocksize * (self.core.height - self.core.hidden))
 end
 
 return field

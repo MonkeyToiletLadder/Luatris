@@ -19,6 +19,7 @@ tetris = {
 field = tetris.field.core.new(vector.new{50, 50}, 12, 19, 10, 40)
 grid = tetris.field.grid.new(field)
 background = tetris.field.background.new(field)
+border = tetris.field.border.new(field)
 
 new_tetromino = true
 current_tetromino = nil
@@ -33,6 +34,7 @@ function love.draw()
 		current_tetromino:draw()
 	end
 	grid:draw()
+	border:draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.print("score: " .. score, 0, 25 * 21)
 end

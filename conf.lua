@@ -3,4 +3,5 @@ function love.conf(t)
     t.window.height = 25 * 22
     t.window.icon = "skull.png"
     t.window.title = "Luatris"
+    t.version = "11.3"
 end
