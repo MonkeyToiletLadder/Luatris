@@ -81,6 +81,7 @@ function game:update()
         self.score = self.score + math.pow(2, self.field.core.cleared)
         self.field.core.cleared = 0
     end
+    self.field.core:update()
 end
 function game:draw()
 	love.graphics.clear(0,0,0)

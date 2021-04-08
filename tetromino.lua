@@ -216,11 +216,7 @@ function tetromino.new(
 
     local overlap = matrix.intersect(state, _tetromino.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
-    if overlap then
-        return false
-    else
-        return _tetromino
-    end
+    return _tetromino
 end
 function tetromino:get_lower_bound(rotation)
     return self.field.height - tetromino.boundaries[self.shape][rotation][tetromino.bound.bottom]
@@ -465,7 +461,7 @@ function tetromino:update()
 			end
 		end
 		self.field.cleared = rows
-		self.onstack = true
+		self.field.onstack = true
 		self.alive = false
 	end
 end
