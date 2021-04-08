@@ -19,6 +19,7 @@ function field.core.new(position, blocksize, hidden, width, height)
     _core.hidden = hidden or 20
     _core.width = width or 10
     _core.height = height or 40
+    _core.cleared = 0
     for j=1,_core.height,1 do
     	_core[j] = {}
     	for i=1,_core.width,1 do
@@ -40,13 +41,12 @@ function field.core:clear_row(row)
         self[row][i] = 0
     end
 end
-function field.core:drop(row, k)
-    k = k or 1
+function field.core:drop(row)
     for j = row, 1, -1 do
         for i in ipairs(self[j]) do
             if self[j][i] ~= 0 then
                 local temp = self[j][i]
-                self[math.min(j + k, self.height)][i] = temp
+                self[math.min(j + 1, self.height)][i] = temp
                 self[j][i] = 0
             end
         end
@@ -115,7 +115,7 @@ end
 function field.border:draw()
     local position = self.core:get_position()
     local blocksize = self.core.blocksize
-    love.graphics.setColor(math.random(255)/255, math.random(255)/255, math.random(255)/255)
+    love.graphics.setColor(1,0,0)
     love.graphics.rectangle("line", position[1], position[2], blocksize * self.core.width, blocksize * (self.core.height - self.core.hidden))
 end
 

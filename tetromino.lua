@@ -3,6 +3,8 @@
     luatris version 0.1.0
     author: vaxeral
     april 6 2021
+
+	TODO: Generate pieces methodicaly
 ]]
 
 local matrix = require "matrix"
@@ -91,6 +93,12 @@ tetromino.bound = {
     top = 2,
     left = 3,
     right = 4,
+}
+tetromino.rotation = {
+	right_side_up = 1,
+	right_side = 2,
+	upside_down = 3,
+	left_side = 4,
 }
 tetromino.direction = {
     left = 1,
@@ -194,14 +202,15 @@ function tetromino.new(
 	local _tetromino = {
 		field = field,
 		shape = shape,
-		position = position,
+		position = vector.new{position[1], position[2]},
 		rotation = rotation,
 		velocity = velocity,
 		modifier = 1,
 		touching = false,
 		locks = locks,
 		delay = delay,
-		timer = 0
+		timer = 0,
+		alive = true,
 	}
 	local tetromino = setmetatable(_tetromino, tetromino)
 
@@ -440,6 +449,27 @@ function tetromino:insert()
 		end
 	end
 end
+function tetromino:update()
+	if love.keyboard.isDown("down") then
+		self.modifier = 10
+	else
+		self.modifier = 1
+	end
+	self:drop()
+	if self.touching and love.timer.getTime() - self.timer > self.delay then
+		self:insert()
+		local rows = 0
+		for j = 1, self.field.height, 1 do
+			if self.field:is_row_full(j) then
+				self.field:clear_row(j)
+				self.field:drop(j)
+				rows = rows + 1
+			end
+		end
+		self.field.cleared = rows
+		self.alive = false
+	end
+end
 function tetromino:draw()
     local blocksize = self.field.blocksize
     local offset = self.field.position
@@ -448,7 +478,7 @@ function tetromino:draw()
     love.graphics.setColor(tetromino.colors[self.shape])
     for j in ipairs(state) do
         for i in ipairs(state[j]) do
-            if state[j][i] ~= 0 and j + position[2] - 2 > self.field.hidden then
+            if state[j][i] ~= 0 and j + math.floor(position[2]) - 2 >= self.field.hidden then
                 love.graphics.rectangle("fill", offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize, blocksize, blocksize)
             end
         end
