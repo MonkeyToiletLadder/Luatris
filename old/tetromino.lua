@@ -8,6 +8,31 @@
 local matrix = require "matrix"
 local vector = require "vector"
 
+local function booltoint(value)
+    return value and 1 or 0
+end
+
+local function setbit(num, n, val)
+    if val then
+        return bit.bor(num, bit.lshift(1, n))
+    else
+        return bit.band(num, bit.bnot(bit.lshift(1, n)))
+    end
+end
+
+local function top_occupied(occupied)
+    return bit.band(occupied, 1) ~= 0
+end
+local function bottom_occupied(occupied)
+    return bit.band(occupied, 2) ~= 0
+end
+local function left_occupied(occupied)
+    return bit.band(occupied, 4) ~= 0
+end
+local function right_occupied(occupied)
+    return bit.band(occupied, 8) ~= 0
+end
+
 local function get_rotations(bitarray)
 	bitarray = matrix.new(bitarray)
 	local rotations = {
@@ -209,9 +234,27 @@ function tetromino.new(
 		delay = delay,
 		timer = 0,
 		alive = true,
-		block = love.graphics.newImage("blocks.png"),
+		mappings = {
+	        left_end = {1, 0},
+	        right_end = {3, 0},
+	        top_end = {0, 1},
+	        bottom_end = {0, 3},
+	        left_wall = {1, 2},
+	        right_wall = {3, 2},
+	        top_wall = {2, 1},
+	        bottom_wall = {2, 3},
+	        top_bottom = {0, 2},
+	        left_right = {2, 0},
+	        bottom_left_corner = {1, 3},
+	        bottom_right_corner = {3, 3},
+	        top_left_corner = {1, 1},
+	        top_right_corner = {3, 1},
+	        middle = {2, 2},
+	        island = {0, 0},
+	    },
+		atlas = love.graphics.newImage("blocks.png"),
 	}
-	_tetromino.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _tetromino.block:getWidth(), _tetromino.block:getWidth())
+	_tetromino.quad = love.graphics.newQuad(0, 0, 0, 0, _tetromino.atlas:getWidth(), _tetromino.atlas:getWidth())
 	local tetromino = setmetatable(_tetromino, tetromino)
 
     local state = tetromino.rotations[shape][rotation]
@@ -475,8 +518,75 @@ function tetromino:draw()
     love.graphics.setColor(tetromino.colors[self.shape])
 	for j in ipairs(state) do
 		for i in ipairs(state[j]) do
+			-- test all four sides of the block
+			local top = {i,j-1}
+			local bottom = {i,j+1}
+			local left = {i-1,j}
+			local right = {i+1,j}
+			-- If the test cell is out of bounds consider it unoccupied
+			local occupied = 0
+			occupied = bit.bor(occupied, bit.lshift(booltoint(top[2] >= self.field.hidden), 0))
+			occupied = bit.bor(occupied, bit.lshift(booltoint(bottom[2] <= self.field.height), 1))
+			occupied = bit.bor(occupied, bit.lshift(booltoint(left[1] >= 1), 2))
+			occupied = bit.bor(occupied, bit.lshift(booltoint(right[1] <= self.field.width), 3))
+
+			-- Test if the cell is occupied
+			if top_occupied(occupied) then
+				occupied = setbit(occupied, 0, self.field:get_block(top) == self.field:get_block({i, j}))
+			end
+			if bottom_occupied(occupied) then
+				occupied = setbit(occupied, 1, self.field:get_block(bottom) == self.field:get_block({i, j}))
+			end
+			if left_occupied(occupied) then
+				occupied = setbit(occupied, 2, self.field:get_block(left) == self.field:get_block({i, j}))
+			end
+			if right_occupied(occupied) then
+				occupied = setbit(occupied, 3, self.field:get_block(right) == self.field:get_block({i, j}))
+			end
+			-- Set the imagedata for the cell
+			local imagedata = nil
+			if occupied == 0 then -- 0000
+				imagedata = "island"
+			elseif occupied == 1 then -- 0001
+				imagedata = "bottom_end"
+			elseif occupied == 2 then -- 0010
+				imagedata = "top_end"
+			elseif occupied == 3 then -- 0011
+				imagedata = "top_bottom"
+			elseif occupied == 4 then -- 0100
+				imagedata = "right_end"
+			elseif occupied == 5 then -- 0101
+				imagedata = "bottom_right_corner"
+			elseif occupied == 6 then -- 0110
+				imagedata = "top_right_corner"
+			elseif occupied == 7 then -- 0111
+				imagedata = "right_wall"
+			elseif occupied == 8 then -- 1000
+				imagedata = "left_end"
+			elseif occupied == 9 then -- 1001
+				imagedata = "bottom_left_corner"
+			elseif occupied == 10 then -- 1010
+				imagedata = "top_left_corner"
+			elseif occupied == 11 then -- 1011
+				imagedata = "left_wall"
+			elseif occupied == 12 then -- 1100
+				imagedata = "left_right"
+			elseif occupied == 13 then -- 1101
+				imagedata = "bottom_wall"
+			elseif occupied == 14 then -- 1110
+				imagedata = "top_wall"
+			elseif occupied == 15 then -- 1111
+				imagedata = "middle"
+			end
 			if state[j][i] ~= 0 then
-				love.graphics.draw(self.block, self.quad, offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize)
+				local mapping = self.mappings[imagedata]
+				self.quad:setViewport(
+					mapping[1] * blocksize,
+					mapping[2] * blocksize,
+					blocksize,
+					blocksize
+				)
+				love.graphics.draw(self.atlas, self.quad, offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize)
 			end
 		end
 	end
