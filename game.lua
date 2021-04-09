@@ -75,7 +75,7 @@ function game:fill_bag()
     self.bag_resets = self.bag_resets + 1
 end
 function game:from_bag()
-    if self.i_absence >= 12 then
+    if self.i_absence > 12 then
         self.i_absence = 0
         return table.remove(self.bag, find(self.bag, tetris.tetromino.shape.i))
     end

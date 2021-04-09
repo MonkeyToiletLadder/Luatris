@@ -4,8 +4,13 @@
     author: vaxeral
     april 2 2021
 
-	TODO: Generate pieces methodicaly to let the player win
-	TODO: Show held piece and next pieceses
+	TODO: Random Generator Beta
+		No streaks of s or z greater than four
+		I appears at least every 12 pieces
+		Randomly selects from bag of 7
+	TODO: Show held piece and next pieces
+	TODO: quick drop and highlight contact area (need lowest points structure)
+	TODO: add controller support.
 ]]
 
 tetris = {
