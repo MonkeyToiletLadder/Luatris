@@ -5,8 +5,7 @@
     april 2 2021
 
 	TODO: Generate pieces methodicaly to let the player win
-	TODO: Pieces stack and swapping DONE yayayayayayay
-	TODO: Show held piece and next pieceses 
+	TODO: Show held piece and next pieceses
 ]]
 
 tetris = {

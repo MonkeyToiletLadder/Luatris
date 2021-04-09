@@ -4,12 +4,22 @@
     author: vaxeral
     april 8 2021
 ]]
+
 local vector = require "vector"
 
 local tetris = {
     field = require "field",
     tetromino = require "tetromino",
 }
+
+local function find(t, value)
+    for i, v in ipairs(t) do
+        if v == value then
+            return i
+        end
+    end
+    return -1
+end
 
 local game = {}
 game.__index = game
@@ -26,6 +36,12 @@ function game.new()
         count = count + 1
     end
 
+    -- Could make seperate class for this
+    _game.sz_streak = 0
+    _game.i_absence = 0
+    _game.bag = {}
+    _game.bag_resets = 0
+
     _game.score = 0
     _game.field = {}
     _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height)
@@ -39,24 +55,57 @@ function game.new()
     _game.tetrominos = {} -- Next pieces
     _game.ntetrominos = count
     _game.store = nil
-    _game.current_tetromino = tetris.tetromino.new(
-        _game.field.core,
-        math.random(1, _game.ntetrominos),
-        _game.spawn,
-        tetris.tetromino.rotation.right_side_up,
-        _game.velocity,
-        _game.locks,
-        _game.delay
-    )
+    _game.current_tetromino = false
+    _game = setmetatable(_game, game)
+
+    _game:fill_bag()
 
     for i = 1, 5, 1 do
-        table.insert(_game.tetrominos, math.random(1, _game.ntetrominos))
+        table.insert(_game.tetrominos, _game:from_bag())
     end
 
-    return setmetatable(_game, game)
+    _game.current_tetromino = _game:new_tetromino()
+
+    return _game
+end
+function game:fill_bag()
+    for i, v in pairs(tetris.tetromino.shape) do
+        table.insert(self.bag, v)
+    end
+    self.bag_resets = self.bag_resets + 1
+end
+function game:from_bag()
+    if self.i_absence >= 12 then
+        self.i_absence = 0
+        return table.remove(self.bag, find(self.bag, tetris.tetromino.shape.i))
+    end
+
+    local candidate = math.random(1, #self.bag)
+    if self.bag[candidate] == tetris.tetromino.shape.i then
+        self.i_absence = 0
+        return table.remove(self.bag, candidate)
+    else
+        self.i_absence = self.i_absence + 1
+    end
+    if self.bag_resets > 2 then
+        self.sz_streak = 0
+        self.bag_resets = 0
+    end
+    if self.bag[candidate] == tetris.tetromino.shape.s or self.bag[candidate] == tetris.tetromino.shape.z then
+        self.sz_streak = self.sz_streak + 1
+    end
+    if self.sz_streak > 4 then
+        self.sz_streak = self.sz_streak - 1
+        for i, v in ipairs(self.bag) do
+            if v ~= tetris.tetromino.shape.s and v ~= tetris.tetromino.shape.z then
+                return table.remove(self.bag, i)
+            end
+        end
+    end
+    return table.remove(self.bag, candidate)
 end
 function game:new_tetromino()
-    table.insert(self.tetrominos, math.random(1, self.ntetrominos))
+    table.insert(self.tetrominos, self:from_bag())
     return tetris.tetromino.new(
                 self.field.core,
                 table.remove(self.tetrominos, 1), -- tetris.tetromino.random(),
@@ -68,6 +117,9 @@ function game:new_tetromino()
             )
 end
 function game:update()
+    if #self.bag == 0 then
+        self:fill_bag()
+    end
     if love.keyboard.isDown("x") then -- Swap if "onstack" requirement met
         if self.field.core.onstack then
             if not self.store then
