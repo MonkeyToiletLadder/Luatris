@@ -35,14 +35,14 @@ function game.new()
     _game.spawn = vector.new{4, 17}
     _game.delay = .75
     _game.locks = 8
-    _game.speed = .05
+    _game.velocity = vector.new{.25, .05}
     _game.tetrominos = count
     _game.current_tetromino = tetris.tetromino.new(
         _game.field.core,
         math.random(1, _game.tetrominos),
         _game.spawn,
         tetris.tetromino.rotation.right_side_up,
-        _game.speed,
+        _game.velocity,
         _game.locks,
         _game.delay
     )
@@ -50,17 +50,7 @@ function game.new()
     return setmetatable(_game, game)
 end
 function game:on_keypressed(key)
-    if self.current_tetromino.alive then
-		if key == "left" then
-			self.current_tetromino:move(tetris.tetromino.direction.left)
-		elseif key == "right" then
-			self.current_tetromino:move(tetris.tetromino.direction.right)
-		elseif key == "a" then
-			self.current_tetromino:rotate(tetris.tetromino.direction.left)
-		elseif key == "s" then
-			self.current_tetromino:rotate(tetris.tetromino.direction.right)
-		end
-	end
+
 end
 function game:update()
     if not self.current_tetromino.alive then
@@ -69,7 +59,7 @@ function game:update()
             math.random(1, self.tetrominos), -- tetris.tetromino.random(),
             self.spawn,
             tetris.tetromino.rotation.right_side_up,
-            self.speed,
+            self.velocity,
             self.locks,
             self.delay
         )

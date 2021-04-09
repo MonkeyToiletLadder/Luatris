@@ -202,14 +202,17 @@ function tetromino.new(
 		shape = shape,
 		position = vector.new{position[1], position[2]},
 		rotation = rotation,
-		velocity = velocity,
+		velocity = vector.new{velocity[1], velocity[2]},
 		modifier = 1,
 		touching = false,
 		locks = locks,
-		delay = delay,
-		timer = 0,
+		lock_delay = delay,
+		lock_timer = 0,
 		alive = true,
 		block = love.graphics.newImage("blocks.png"),
+		rotation_delay = .25,
+		rotation_timer = 0,
+		last_block = position[1],
 	}
 	_tetromino.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _tetromino.block:getWidth(), _tetromino.block:getWidth())
 	local tetromino = setmetatable(_tetromino, tetromino)
@@ -294,7 +297,7 @@ function tetromino:drop()
     if test[2] > self:get_lower_bound(self.rotation) then
         should_drop = false
         if not self.touching then
-            self.timer = love.timer.getTime()
+            self.lock_timer = love.timer.getTime()
             self.touching = true
         end
     end
@@ -303,7 +306,7 @@ function tetromino:drop()
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
-            self.timer = love.timer.getTime()
+            self.lock_timer = love.timer.getTime()
             self.touching = true
         end
         should_drop = false
@@ -313,7 +316,7 @@ function tetromino:drop()
         -- The speed of a tetromino is maxed at 1 to prevent complex collision logic
         -- Basically the tetromino would need to be tested at all the points between the next state and the starting state
         -- The speed of a tetromino probably doesnt need to exceed 1 anyways
-        self.position[2] = self.position[2] + math.min(self.velocity * self.modifier, 1)
+        self.position[2] = self.position[2] + math.min(self.velocity[2] * self.modifier, 1)
     end
 
     test = vector.new{
@@ -325,7 +328,7 @@ function tetromino:drop()
     -- test below the piece again to see if its touching the floor or another tetromino
     if test[2] > self:get_lower_bound(self.rotation) then
         if not self.touching then
-            self.timer = love.timer.getTime()
+            self.lock_timer = love.timer.getTime()
             self.touching = true
         end
     end
@@ -333,15 +336,20 @@ function tetromino:drop()
     overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
-            self.timer = love.timer.getTime()
+            self.lock_timer = love.timer.getTime()
             self.touching = true
         end
     end
 end
 function tetromino:rotate(direction)
+	if love.timer.getTime() - self.rotation_timer <= self.rotation_delay then
+		return
+	end
     if self.locks <= 0 then
         return
     end
+
+	self.rotation_timer = love.timer.getTime()
 
     local rotation = self:get_next_rotation(direction)
     local state = tetromino.rotations[self.shape][rotation]
@@ -378,7 +386,7 @@ function tetromino:rotate(direction)
             if self.touching then
                 self.locks = self.locks - 1
                 self.touching = false
-                self.timer = 0
+                self.lock_timer = 0
             end
             self:set_next_rotation(direction)
             self.position[1] = test[1]
@@ -395,9 +403,9 @@ function tetromino:move(direction)
     local step = 0
 
     if direction == tetromino.direction.left then
-        step = -1
+        step = -1 * self.velocity[1]
     elseif direction == tetromino.direction.right then
-        step = 1
+        step = 1 * self.velocity[1]
     end
 
     local rotation = self:get_rotation()
@@ -408,9 +416,11 @@ function tetromino:move(direction)
     }
     test[1] = test[1] + step
     if test[1] < self:get_left_bound(rotation) then
+		self.position[1] = self:get_left_bound(rotation)
         return
     end
     if test[1] > self:get_right_bound(rotation) then
+		self.position[1] = self:get_right_bound(rotation)
         return
     end
 
@@ -422,10 +432,11 @@ function tetromino:move(direction)
         return
     end
 
-    if self.touching then
+    if self.touching and self.last_block ~= math.floor(self.position[1]) then
         self.locks = self.locks - 1
 		self.touching = false
-		self.timer = 0
+		self.lock_timer = 0
+		self.last_block = math.floor(self.position[1])
     end
     self.position[1] = test[1]
     self.position[2] = test[2]
@@ -446,13 +457,22 @@ function tetromino:insert()
 	end
 end
 function tetromino:update()
+	if love.keyboard.isDown("left") then
+		self:move(tetromino.direction.left)
+	elseif love.keyboard.isDown("right") then
+		self:move(tetromino.direction.right)
+	elseif love.keyboard.isDown("a") then
+		self:rotate(tetromino.direction.left)
+	elseif love.keyboard.isDown("s") then
+		self:rotate(tetromino.direction.right)
+	end
 	if love.keyboard.isDown("down") then
 		self.modifier = 10
 	else
 		self.modifier = 1
 	end
 	self:drop()
-	if self.touching and love.timer.getTime() - self.timer > self.delay then
+	if self.touching and love.timer.getTime() - self.lock_timer > self.lock_delay then
 		self:insert()
 		local rows = 0
 		for j = 1, self.field.height, 1 do
@@ -476,7 +496,7 @@ function tetromino:draw()
 	for j in ipairs(state) do
 		for i in ipairs(state[j]) do
 			if state[j][i] ~= 0 then
-				love.graphics.draw(self.block, self.quad, offset[1] + (i + position[1] - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize)
+				love.graphics.draw(self.block, self.quad, offset[1] + (i + math.floor(position[1]) - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize)
 			end
 		end
 	end
