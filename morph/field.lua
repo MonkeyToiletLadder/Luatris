@@ -12,6 +12,31 @@ vector = require "vector"
 
 local field = {}
 
+local function booltoint(value)
+    return value and 1 or 0
+end
+
+local function setbit(num, n, val)
+    if val then
+        return bit.bor(num, bit.lshift(1, n))
+    else
+        return bit.band(num, bit.bnot(bit.lshift(1, n)))
+    end
+end
+
+local function top_occupied(occupied)
+    return bit.band(occupied, 1) ~= 0
+end
+local function bottom_occupied(occupied)
+    return bit.band(occupied, 2) ~= 0
+end
+local function left_occupied(occupied)
+    return bit.band(occupied, 4) ~= 0
+end
+local function right_occupied(occupied)
+    return bit.band(occupied, 8) ~= 0
+end
+
 field.core = {}
 field.core.__index = field.core
 function field.core.new(position, blocksize, hidden, width, height)

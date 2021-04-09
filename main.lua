@@ -5,7 +5,8 @@
     april 2 2021
 
 	TODO: Generate pieces methodicaly to let the player win
-	TODO: Use blocks.png
+	TODO: Pieces stack and swapping DONE yayayayayayay
+	TODO: Show held piece and next pieceses 
 ]]
 
 tetris = {
@@ -22,7 +23,4 @@ function love.draw()
 end
 function love.update()
 	game:update()
-end
-function love.keypressed(key, scancode, isrepeat)
-	game:on_keypressed(key)
 end

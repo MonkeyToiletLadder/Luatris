@@ -24,7 +24,7 @@ function field.core.new(position, blocksize, hidden, width, height)
     _core.width = width or 10
     _core.height = height or 40
     _core.cleared = 0
-    _core.onstack = false
+    _core.onstack = true -- Use for detecting when a piece can be swapped
     _core.block = love.graphics.newImage("blocks.png")
     _core.quad = love.graphics.newQuad(0, 0, _core.blocksize, _core.blocksize, _core.block:getWidth(), _core.block:getHeight())
     for j=1,_core.height,1 do

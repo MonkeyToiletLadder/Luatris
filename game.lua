@@ -36,10 +36,12 @@ function game.new()
     _game.delay = .75
     _game.locks = 8
     _game.velocity = vector.new{.25, .05}
-    _game.tetrominos = count
+    _game.tetrominos = {} -- Next pieces
+    _game.ntetrominos = count
+    _game.store = nil
     _game.current_tetromino = tetris.tetromino.new(
         _game.field.core,
-        math.random(1, _game.tetrominos),
+        math.random(1, _game.ntetrominos),
         _game.spawn,
         tetris.tetromino.rotation.right_side_up,
         _game.velocity,
@@ -47,22 +49,48 @@ function game.new()
         _game.delay
     )
 
+    for i = 1, 5, 1 do
+        table.insert(_game.tetrominos, math.random(1, _game.ntetrominos))
+    end
+
     return setmetatable(_game, game)
 end
-function game:on_keypressed(key)
-
+function game:new_tetromino()
+    table.insert(self.tetrominos, math.random(1, self.ntetrominos))
+    return tetris.tetromino.new(
+                self.field.core,
+                table.remove(self.tetrominos, 1), -- tetris.tetromino.random(),
+                self.spawn,
+                tetris.tetromino.rotation.right_side_up,
+                self.velocity,
+                self.locks,
+                self.delay
+            )
 end
 function game:update()
+    if love.keyboard.isDown("x") then -- Swap if "onstack" requirement met
+        if self.field.core.onstack then
+            if not self.store then
+                self.current_tetromino.position = {
+                    self.spawn[1],
+                    self.spawn[2],
+                }
+                self.store = self.current_tetromino
+                self.current_tetromino = self:new_tetromino()
+            else
+                self.current_tetromino.position = {
+                    self.spawn[1],
+                    self.spawn[2],
+                }
+                local temp = self.store
+                self.store = self.current_tetromino
+                self.current_tetromino = temp
+            end
+            self.field.core.onstack = false
+        end
+    end
     if not self.current_tetromino.alive then
-		self.current_tetromino = tetris.tetromino.new(
-            self.field.core,
-            math.random(1, self.tetrominos), -- tetris.tetromino.random(),
-            self.spawn,
-            tetris.tetromino.rotation.right_side_up,
-            self.velocity,
-            self.locks,
-            self.delay
-        )
+		self.current_tetromino = self:new_tetromino()
 	end
 	if self.current_tetromino.alive then
 		self.current_tetromino:update()
