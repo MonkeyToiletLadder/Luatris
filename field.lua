@@ -3,10 +3,6 @@
     luatris version 0.1.0
     author: vaxeral
     april 1 2021
-
-    Only update field when piece is set
-    vaxeral 164
-    spacebar64
 ]]
 
 tetromino = require "tetromino"

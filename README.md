@@ -10,4 +10,4 @@ To run use love on the .love file
 Left and right arrows to move.  a and s to rotate. swap piece with x
 
 ## Future Features
-Holding/Swaping pieces.  Pieces preview.  Multiplayer. Grey blocks. Juice and more.
+Piece preview.  Multiplayer.  Settings and sensitivities.

@@ -1,8 +1,12 @@
 --[[
-    tetris.tetromino.lua
+    main.lua
     luatris version 0.1.0
     author: vaxeral
     april 2 2021
+
+	Highscores
+	vaxeral: 164
+    spacebar64:
 
 	TODO: Random Generator Beta
 		No streaks of s or z greater than four
@@ -11,6 +15,7 @@
 	TODO: Show held piece and next pieces
 	TODO: quick drop and highlight contact area (need lowest points structure)
 	TODO: add controller support.
+	TODO: Add settings and sensitivities
 ]]
 
 tetris = {
