@@ -58,10 +58,11 @@ function game.new()
     return _game
 end
 function game:new_tetromino()
+    local shape = table.remove(self.tetrominos, 1)
     table.insert(self.tetrominos, self.bag:draw())
     return tetris.tetromino.new(
                 self.field.core,
-                table.remove(self.tetrominos, 1),
+                shape,
                 self.spawn,
                 tetris.tetromino.rotation.right_side_up,
                 self.velocity,

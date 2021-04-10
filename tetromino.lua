@@ -414,22 +414,15 @@ function tetromino:move(direction)
         self.position[1],
         self.position[2],
     }
+	local should_move = true
     test[1] = test[1] + step
-    if test[1] < self:get_left_bound(rotation) then
-		self.position[1] = self:get_left_bound(rotation)
-        return
-    end
-    if test[1] > self:get_right_bound(rotation) then
-		self.position[1] = self:get_right_bound(rotation)
-        return
-    end
 
     local state = tetromino.rotations[self.shape][rotation]
 
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
     if overlap then
-        return
+        should_move = false
     end
 
     if self.touching and self.last_block ~= math.floor(self.position[1]) then
@@ -438,8 +431,16 @@ function tetromino:move(direction)
 		self.lock_timer = 0
 		self.last_block = math.floor(self.position[1])
     end
-    self.position[1] = test[1]
-    self.position[2] = test[2]
+	if should_move then
+    	self.position[1] = test[1]
+    	self.position[2] = test[2]
+		if test[1] < self:get_left_bound(rotation) then
+			self.position[1] = self:get_left_bound(rotation)
+	    end
+	    if test[1] > self:get_right_bound(rotation) then
+	        self.position[1] = self:get_right_bound(rotation)
+	    end
+	end
 end
 function tetromino:insert()
 	local rotation = self:get_rotation()
