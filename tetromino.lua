@@ -76,7 +76,7 @@ local function get_boundaries(bitarrays)
 end
 
 local tetromino = {}
-tetromino.__index = tetromino
+
 tetromino.shape = {
     i = 1,
     j = 2,
@@ -168,28 +168,31 @@ tetromino.boundaries = {
     get_boundaries(tetromino.rotations[tetromino.shape.t]),
     get_boundaries(tetromino.rotations[tetromino.shape.z]),
 }
+-- The wikis chart has 1 for up and -1 for down while this chart is the inverse
 tetromino.wallkicktests_jlstz = {
-    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
-    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
-    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
-    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
-    { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
-    { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
     { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
     { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
+    { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
+    { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
+    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
+    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
+    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
+    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
 }
 tetromino.wallkicktests_i = {
-    { 0, 0,-2, 0, 1, 0,-2,-1, 1, 2},
-    { 0, 0, 2, 0,-1, 0, 2, 1,-1,-2},
-    { 0, 0,-1, 0, 2, 0,-1, 2, 2,-1},
-    { 0, 0, 1, 0,-2, 0, 1,-2,-2, 1},
-    { 0, 0, 2, 0,-1, 0, 2, 1,-1,-2},
-    { 0, 0,-2, 0, 1, 0,-2,-1, 1, 2},
-    { 0, 0, 1, 0,-2, 0, 1,-2,-2, 1},
-    { 0, 0,-1, 0, 2, 0,-1, 2, 2,-1},
+    { 0, 0,-2, 0, 1, 0,-2, 1, 1,-2},
+    { 0, 0, 2, 0,-1, 0, 2,-1,-1, 2},
+    { 0, 0,-1, 0, 2, 0,-1,-2, 2, 1},
+    { 0, 0, 1, 0,-2, 0, 1, 2,-2,-1},
+    { 0, 0, 2, 0,-1, 0, 2,-1,-1, 2},
+    { 0, 0,-2, 0, 1, 0,-2, 1, 1,-2},
+    { 0, 0, 1, 0,-2, 0, 1, 2,-2,-1},
+    { 0, 0,-1, 0, 2, 0,-1,-2, 2, 1},
 }
 
-function tetromino.new(
+tetromino.piece = {}
+tetromino.piece.__index = tetromino.piece
+function tetromino.piece.new(
     field,
     shape,
     position,
@@ -197,7 +200,7 @@ function tetromino.new(
     velocity,
     locks,
     delay)
-	local _tetromino = {
+	local _piece = {
 		field = field,
 		shape = shape,
 		position = vector.new{position[1], position[2]},
@@ -214,31 +217,31 @@ function tetromino.new(
 		rotation_timer = 0,
 		last_block = position[1],
 	}
-	_tetromino.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _tetromino.block:getWidth(), _tetromino.block:getWidth())
-	local tetromino = setmetatable(_tetromino, tetromino)
+	_piece.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _piece.block:getWidth(), _piece.block:getWidth())
+	local _piece = setmetatable(_piece, tetromino.piece)
 
     local state = tetromino.rotations[shape][rotation]
 
-    local overlap = matrix.intersect(state, _tetromino.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    local overlap = matrix.intersect(state, _piece.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
-    return _tetromino
+    return _piece
 end
-function tetromino:get_lower_bound(rotation)
+function tetromino.piece:get_lower_bound(rotation)
     return self.field.height - tetromino.boundaries[self.shape][rotation][tetromino.bound.bottom]
 end
-function tetromino:get_upper_bound(rotation)
+function tetromino.piece:get_upper_bound(rotation)
     return 1 - tetromino.boundaries[self.shape][rotation][tetromino.bound.top]
 end
-function tetromino:get_left_bound(rotation)
+function tetromino.piece:get_left_bound(rotation)
     return 1 - tetromino.boundaries[self.shape][rotation][tetromino.bound.left]
 end
-function tetromino:get_right_bound(rotation)
+function tetromino.piece:get_right_bound(rotation)
     return self.field.width - tetromino.boundaries[self.shape][rotation][tetromino.bound.right]
 end
-function tetromino:get_rotation()
+function tetromino.piece:get_rotation()
     return self.rotation
 end
-function tetromino:get_next_rotation(direction)
+function tetromino.piece:get_next_rotation(direction)
     local rotation = self.rotation
     if direction == tetromino.direction.left then
         rotation = rotation - 1
@@ -249,13 +252,13 @@ function tetromino:get_next_rotation(direction)
     if rotation < 1 then rotation = rotation + 4 end
     return rotation
 end
-function tetromino:get_state()
+function tetromino.piece:get_state()
     return tetromino.rotations[self.shape][self:get_rotation()]
 end
-function tetromino:set_next_rotation(direction)
+function tetromino.piece:set_next_rotation(direction)
     self.rotation = self:get_next_rotation(direction)
 end
-function tetromino:get_wallkicktests(direction)
+function tetromino.piece:get_wallkicktests(direction)
     local rotation = self:get_next_rotation(direction)
     local tests = 1
     if self.rotation == 1 and rotation == 2 then
@@ -285,7 +288,7 @@ function tetromino:get_wallkicktests(direction)
 
     return tetromino.wallkicktests_jlstz[tests]
 end
-function tetromino:drop()
+function tetromino.piece:drop()
     local test = vector.new{
         self.position[1],
         self.position[2],
@@ -341,7 +344,7 @@ function tetromino:drop()
         end
     end
 end
-function tetromino:rotate(direction)
+function tetromino.piece:rotate(direction)
 	if love.timer.getTime() - self.rotation_timer <= self.rotation_delay then
 		return
 	end
@@ -395,7 +398,7 @@ function tetromino:rotate(direction)
         end
     end
 end
-function tetromino:move(direction)
+function tetromino.piece:move(direction)
     if self.locks <= 0 then
         return
     end
@@ -442,7 +445,7 @@ function tetromino:move(direction)
 	    end
 	end
 end
-function tetromino:insert()
+function tetromino.piece:insert()
 	local rotation = self:get_rotation()
     local state = tetromino.rotations[self.shape][rotation]
 
@@ -457,7 +460,7 @@ function tetromino:insert()
 		end
 	end
 end
-function tetromino:update()
+function tetromino.piece:update()
 	if love.keyboard.isDown("left") then
 		self:move(tetromino.direction.left)
 	elseif love.keyboard.isDown("right") then
@@ -488,7 +491,7 @@ function tetromino:update()
 		self.alive = false
 	end
 end
-function tetromino:draw()
+function tetromino.piece:draw()
     local blocksize = self.field.blocksize
     local offset = self.field.position
     local state = tetromino.rotations[self.shape][self.rotation]
