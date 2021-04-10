@@ -70,6 +70,10 @@ function game:new_tetromino()
             )
 end
 function game:update()
+    if not self.current_tetromino then
+        -- For now just return
+        return
+    end
     if #self.bag.pieces == 0 then
         self.bag:fill()
     end
@@ -96,9 +100,6 @@ function game:update()
             self.field.core.onstack = false
         end
     end
-    if not self.current_tetromino.alive then
-		self.current_tetromino = self:new_tetromino()
-	end
 	if self.current_tetromino.alive then
 		self.current_tetromino:update()
 	end
@@ -106,12 +107,15 @@ function game:update()
         self.score = self.score + math.pow(2, self.field.core.cleared)
         self.field.core.cleared = 0
     end
+    if not self.current_tetromino.alive then
+		self.current_tetromino = self:new_tetromino()
+	end
 end
 function game:draw()
 	love.graphics.clear(0,0,0)
     self.field.background:draw()
 	self.field.core:draw()
-	if self.current_tetromino.alive then
+	if self.current_tetromino and self.current_tetromino.alive then
 		self.current_tetromino:draw()
 	end
 	self.field.grid:draw()

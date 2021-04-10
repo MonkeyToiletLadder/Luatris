@@ -225,10 +225,9 @@ function tetromino.piece.new(
     local overlap = matrix.intersect(state, _piece.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
 	if overlap then
-		while true do
-
-		end
+		return nil
 	end
+
     return _piece
 end
 function tetromino.piece:get_lower_bound(rotation)
