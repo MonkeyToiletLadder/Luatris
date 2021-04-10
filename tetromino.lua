@@ -224,6 +224,11 @@ function tetromino.piece.new(
 
     local overlap = matrix.intersect(state, _piece.field, position:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
+	if overlap then
+		while true do
+
+		end
+	end
     return _piece
 end
 function tetromino.piece:get_lower_bound(rotation)
@@ -372,31 +377,21 @@ function tetromino.piece:rotate(direction)
         local should_move = true
         if math.floor(test[1]) < self:get_left_bound(rotation) then
             should_move = false
-			print("left bound")
-			print(tests[i], tests[j])
         end
         if math.floor(test[1]) > self:get_right_bound(rotation) then
             should_move = false
-			print("right bound")
-			print(tests[i], tests[j])
         end
         if math.floor(test[2]) > self:get_lower_bound(rotation) then
-			print("lower bound")
-			print(tests[i], tests[j])
             should_move = false
         end
 
         local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
         if overlap then
-			print("overlap")
-			print(tests[i], tests[j])
             should_move = false
         end
 
         if should_move then
-			print("test used")
-			print(tests[i], tests[j])
             if self.touching then
                 self.locks = self.locks - 1
                 self.touching = false

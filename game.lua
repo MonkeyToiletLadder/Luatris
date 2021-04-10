@@ -18,7 +18,7 @@ game.__index = game
 function game.new()
     local _game = {}
 
-    local blocksize = 32
+    local blocksize = 16
     local hidden = 20
     local width = 10
     local height = 40
@@ -31,7 +31,7 @@ function game.new()
     _game.bag = tetris.bag.new()
     _game.score = 0
     _game.field = {}
-    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height)
+    _game.field.core = tetris.field.core.new(vector.new{0, 20 * 16}, blocksize, hidden, width, height)
     _game.field.background = tetris.field.background.new(_game.field.core)
     _game.field.border = tetris.field.border.new(_game.field.core)
     _game.field.grid = tetris.field.grid.new(_game.field.core)
@@ -82,19 +82,22 @@ function game:update()
                 }
                 self.store = self.current_tetromino
                 self.current_tetromino = self:new_tetromino()
+                self.store.touching = false
+                self.store.timer = 0
             else
                 self.current_tetromino.position = {
                     self.spawn[1],
                     self.spawn[2],
                 }
-                local temp = self.store
-                self.store = self.current_tetromino
-                self.current_tetromino = temp
+                self.store, self.current_tetromino = self.current_tetromino, self.store
+                self.store.touching = false
+                self.store.timer = 0
             end
             self.field.core.onstack = false
         end
     end
     if not self.current_tetromino.alive then
+        print("not alive")
 		self.current_tetromino = self:new_tetromino()
 	end
 	if self.current_tetromino.alive then

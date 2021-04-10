@@ -36,20 +36,23 @@ function bag:fill()
     for i, v in pairs(tetris.tetromino.shape) do
         table.insert(self.pieces, v)
     end
+    print("fill bag")
     -- self.bag_resets = self.bag_resets + 1
-    print("Bag reset")
 end
 function bag:draw()
+    print("draw" .. love.timer.getTime())
+    if #self.pieces == 0 then
+        print("NO PIECES")
+        return nil
+    end
     if self.i_absence > 12 then
         self.i_absence = 0
-        print("i piece 12 streak")
         return table.remove(self.pieces, find(self.pieces, tetris.tetromino.shape.i))
     end
 
     local candidate = math.random(1, #self.pieces)
     if self.pieces[candidate] == tetris.tetromino.shape.i then
         self.i_absence = 0
-        print("i piece")
         return table.remove(self.pieces, candidate)
     else
         self.i_absence = self.i_absence + 1
@@ -71,7 +74,6 @@ function bag:draw()
     --         end
     --     end
     -- end
-    print("normal peice " .. self.pieces[candidate])
     return table.remove(self.pieces, candidate)
 end
 
