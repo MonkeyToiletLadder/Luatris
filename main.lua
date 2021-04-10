@@ -16,8 +16,6 @@
 	TODO: quick drop and highlight contact area (need lowest points structure)
 	TODO: add controller support.
 	TODO: Add settings and sensitivities
-	NOTE: The game just stops giving pieces sometimes.  Cause not known.
-	NOTE: Swapping is broken
 ]]
 
 tetris = {

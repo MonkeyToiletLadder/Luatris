@@ -66,7 +66,7 @@ function field.core:get_block(tuple)
 end
 function field.core:draw()
     local offset = self.position
-	for j=1,self.height,1 do
+	for j=self.hidden+1,self.height,1 do
 		for i=1,self.width,1 do
             local shape = self[j][i]
             local color = tetromino.colors[shape]
@@ -89,7 +89,7 @@ function field.grid:draw()
     local offset = self.core:get_position()
     local blocksize = self.core.blocksize
     love.graphics.setColor(.9, .9, .9)
-    for j=1,self.core.height,1 do
+    for j=1,self.core.height - self.core.hidden,1 do
 		for i=1,self.core.width,1 do
             local shape = self.core[j][i]
 			love.graphics.rectangle("line", offset[1] + (i - 1) * blocksize, offset[2] + (j - 1) * blocksize, blocksize, blocksize)

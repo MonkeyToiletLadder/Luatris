@@ -31,7 +31,7 @@ function game.new()
     _game.bag = tetris.bag.new()
     _game.score = 0
     _game.field = {}
-    _game.field.core = tetris.field.core.new(vector.new{0, 20 * 16}, blocksize, hidden, width, height)
+    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height)
     _game.field.background = tetris.field.background.new(_game.field.core)
     _game.field.border = tetris.field.border.new(_game.field.core)
     _game.field.grid = tetris.field.grid.new(_game.field.core)
@@ -97,7 +97,6 @@ function game:update()
         end
     end
     if not self.current_tetromino.alive then
-        print("not alive")
 		self.current_tetromino = self:new_tetromino()
 	end
 	if self.current_tetromino.alive then
