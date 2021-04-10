@@ -264,6 +264,7 @@ function tetromino.piece:get_wallkicktests(direction)
     if self.rotation == 1 and rotation == 2 then
         tests = 1
     elseif self.rotation == 2 and rotation == 1 then
+		print("test 2")
         tests = 2
     elseif self.rotation == 2 and rotation == 3 then
         tests = 3
@@ -369,23 +370,33 @@ function tetromino.piece:rotate(direction)
         test[2] = test[2] + tests[j]
 
         local should_move = true
-        if test[1] < self:get_left_bound(rotation) then
+        if math.floor(test[1]) < self:get_left_bound(rotation) then
             should_move = false
+			print("left bound")
+			print(tests[i], tests[j])
         end
-        if test[1] > self:get_right_bound(rotation) then
+        if math.floor(test[1]) > self:get_right_bound(rotation) then
             should_move = false
+			print("right bound")
+			print(tests[i], tests[j])
         end
-        if test[2] > self:get_lower_bound(rotation) then
+        if math.floor(test[2]) > self:get_lower_bound(rotation) then
+			print("lower bound")
+			print(tests[i], tests[j])
             should_move = false
         end
 
         local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
         if overlap then
+			print("overlap")
+			print(tests[i], tests[j])
             should_move = false
         end
 
         if should_move then
+			print("test used")
+			print(tests[i], tests[j])
             if self.touching then
                 self.locks = self.locks - 1
                 self.touching = false
@@ -504,6 +515,22 @@ function tetromino.piece:draw()
 			end
 		end
 	end
+end
+
+tetromino.array = {}
+tetromino.array.__index = tetromino.array
+function tetromino.array.new()
+	local _array = {}
+
+	_array.pieces = {}
+
+	return setmetatable(_array, tetromino.array)
+end
+function tetromino.array:pop_front()
+	return table.remove(self.pieces, 1)
+end
+function tetromino.array:push(piece)
+	table.insert(self.pieces, piece)
 end
 
 return tetromino

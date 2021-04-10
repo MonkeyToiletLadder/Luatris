@@ -41,7 +41,7 @@ function game.new()
     _game.velocity = vector.new{.20, .05}
 
     -- Should i put this data in a seperate class?
-    _game.tetrominos = {} -- Next pieces
+    _game.tetrominos = tetris.tetromino.array.new()
     _game.ntetrominos = count
     _game.store = nil
     _game.current_tetromino = false
@@ -50,7 +50,7 @@ function game.new()
     _game.bag:fill()
 
     for i = 1, 5, 1 do
-        table.insert(_game.tetrominos, _game.bag:draw())
+        _game.tetrominos:push(_game.bag:draw())
     end
 
     _game.current_tetromino = _game:new_tetromino()
@@ -58,10 +58,10 @@ function game.new()
     return _game
 end
 function game:new_tetromino()
-    table.insert(self.tetrominos, self.bag:draw())
+    self.tetrominos:push(self.bag:draw())
     return tetris.tetromino.piece.new(
                 self.field.core,
-                table.remove(self.tetrominos, 1),
+                self.tetrominos:pop_front(),
                 self.spawn,
                 tetris.tetromino.rotation.right_side_up,
                 self.velocity,
