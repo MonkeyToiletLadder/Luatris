@@ -10,7 +10,8 @@ local vector = require "vector"
 local tetris = {
     field = require "field",
     tetromino = require "tetromino",
-    bag = require "bag"
+    bag = require "bag",
+    preview = require "preview",
 }
 
 local game = {}
@@ -22,26 +23,34 @@ function game.new()
     local hidden = 20
     local width = 10
     local height = 40
+    local scale = 1
 
     local count = 0
     for _, _ in pairs(tetris.tetromino.shape) do
         count = count + 1
     end
 
+    local array = tetris.tetromino.array.new()
+
     _game.bag = tetris.bag.new()
     _game.score = 0
+
     _game.field = {}
-    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height, 2)
+    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height, scale)
     _game.field.background = tetris.field.background.new(_game.field.core)
     _game.field.border = tetris.field.border.new(_game.field.core, love.graphics.newImage("border.png"), 16, 16)
     _game.field.grid = tetris.field.grid.new(_game.field.core)
+
+    _game.preview = {}
+    _game.preview.core = tetris.preview.core.new(array, vector.new{_game.field.core.border.width, 0}, blocksize, 4, 4*5, scale)
+    _game.preview.background = tetris.preview.background.new(_game.preview.core)
+    _game.preview.border = tetris.preview.border.new(_game.preview.core, love.graphics.newImage("border.png"), 16, 16)
+
     _game.spawn = vector.new{4, 17}
     _game.delay = .75
     _game.locks = 8
     _game.velocity = vector.new{.175, .05}
 
-    -- Should i put this data in a seperate class?
-    _game.tetrominos = tetris.tetromino.array.new()
     _game.ntetrominos = count
     _game.store = nil
     _game.current_tetromino = false
@@ -50,7 +59,7 @@ function game.new()
     _game.bag:fill()
 
     for i = 1, 5, 1 do
-        _game.tetrominos:push(_game.bag:draw())
+        _game.preview.core:push(_game.bag:draw())
     end
 
     _game.current_tetromino = _game:new_tetromino()
@@ -58,10 +67,10 @@ function game.new()
     return _game
 end
 function game:new_tetromino()
-    self.tetrominos:push(self.bag:draw())
+    self.preview.core:push(self.bag:draw())
     return tetris.tetromino.piece.new(
                 self.field.core,
-                self.tetrominos:pop_front(),
+                self.preview.core:pop_front(),
                 self.spawn,
                 tetris.tetromino.rotation.right_side_up,
                 self.velocity,
@@ -119,7 +128,9 @@ function game:draw()
 	if self.current_tetromino and self.current_tetromino.alive then
 		self.current_tetromino:draw()
 	end
-	self.field.grid:draw()
+    -- self.preview.border:draw()
+    self.preview.background:draw()
+    self.preview.core:draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.print("score: " .. self.score, 0, self.field.core.blocksize * 20)
 end

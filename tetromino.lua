@@ -538,41 +538,4 @@ function tetromino.array:push(piece)
 	table.insert(self.pieces, piece)
 end
 
-tetromino.preview = {}
-
-tetromino.preview.core = {}
-tetromino.preview.core.__index = tetromino.preview.core
-function tetromino.preview.core.new(array)
-	local _preview = {}
-
-	_preview.array = array
-
-	return setmetatable(_preview, tetromino.preview)
-end
-function tetromino.preview.core:draw()
-
-end
-
-tetromino.preview.background = {}
-tetromino.preview.background.__index = tetromino.preview.background
-function tetromino.preview.background.new(core)
-	local _background = {}
-
-	_background.core = core
-
-	return setmetatable(_background, tetromino.preview.background)
-end
-function tetromino.preview.background:draw()
-
-end
-
-tetromino.preview.border = {}
-tetromino.preview.border.__index = tetromino.preview.border
-function tetromino.preview.border.new()
-
-end
-function tetromino.preview.border:draw()
-
-end
-
 return tetromino
