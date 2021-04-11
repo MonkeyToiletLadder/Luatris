@@ -213,7 +213,7 @@ function tetromino.piece.new(
 		lock_timer = 0,
 		alive = true,
 		block = love.graphics.newImage("blocks.png"),
-		rotation_delay = .25,
+		rotation_delay = .175,
 		rotation_timer = 0,
 		last_block = position[1],
 	}
@@ -268,7 +268,6 @@ function tetromino.piece:get_wallkicktests(direction)
     if self.rotation == 1 and rotation == 2 then
         tests = 1
     elseif self.rotation == 2 and rotation == 1 then
-		print("test 2")
         tests = 2
     elseif self.rotation == 2 and rotation == 3 then
         tests = 3
@@ -468,11 +467,14 @@ end
 function tetromino.piece:update()
 	if love.keyboard.isDown("left") then
 		self:move(tetromino.direction.left)
-	elseif love.keyboard.isDown("right") then
+	end
+	if love.keyboard.isDown("right") then
 		self:move(tetromino.direction.right)
-	elseif love.keyboard.isDown("a") then
+	end
+	if love.keyboard.isDown("a") then
 		self:rotate(tetromino.direction.left)
-	elseif love.keyboard.isDown("s") then
+	end
+	if love.keyboard.isDown("s") then
 		self:rotate(tetromino.direction.right)
 	end
 	if love.keyboard.isDown("down") then
@@ -498,18 +500,19 @@ function tetromino.piece:update()
 end
 function tetromino.piece:draw()
     local blocksize = self.field:get_block_size()
-    local offset = self.field.position
+    local offset = self.field:get_inner_position()
     local state = tetromino.rotations[self.shape][self.rotation]
     local position = self.position
     love.graphics.setColor(tetromino.colors[self.shape])
 	for j in ipairs(state) do
 		for i in ipairs(state[j]) do
 			if state[j][i] ~= 0 and j - 1 + math.floor(position[2]) > self.field.hidden then
+				k = j - self.field.hidden
 				love.graphics.draw(
 					self.block,
 					self.quad,
 					offset[1] + (i + math.floor(position[1]) - 2) * blocksize,
-					offset[2] + (j + math.floor(position[2]) - 2) * blocksize,
+					offset[2] + (k + math.floor(position[2]) - 2) * blocksize,
 					0,
 					self.field.scale,
 					self.field.scale
@@ -536,7 +539,40 @@ function tetromino.array:push(piece)
 end
 
 tetromino.preview = {}
-tetromino.preview.__index = tetromino.preview
 
+tetromino.preview.core = {}
+tetromino.preview.core.__index = tetromino.preview.core
+function tetromino.preview.core.new(array)
+	local _preview = {}
+
+	_preview.array = array
+
+	return setmetatable(_preview, tetromino.preview)
+end
+function tetromino.preview.core:draw()
+
+end
+
+tetromino.preview.background = {}
+tetromino.preview.background.__index = tetromino.preview.background
+function tetromino.preview.background.new(core)
+	local _background = {}
+
+	_background.core = core
+
+	return setmetatable(_background, tetromino.preview.background)
+end
+function tetromino.preview.background:draw()
+
+end
+
+tetromino.preview.border = {}
+tetromino.preview.border.__index = tetromino.preview.border
+function tetromino.preview.border.new()
+
+end
+function tetromino.preview.border:draw()
+
+end
 
 return tetromino

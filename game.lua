@@ -31,14 +31,14 @@ function game.new()
     _game.bag = tetris.bag.new()
     _game.score = 0
     _game.field = {}
-    _game.field.core = tetris.field.core.new(vector.new{20, 20}, blocksize, hidden, width, height, .5)
+    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height, 2)
     _game.field.background = tetris.field.background.new(_game.field.core)
-    _game.field.border = tetris.field.border.new(_game.field.core, love.graphics.newImage("samus.png"), 1, 1, 1)
+    _game.field.border = tetris.field.border.new(_game.field.core, love.graphics.newImage("border.png"), 16, 16)
     _game.field.grid = tetris.field.grid.new(_game.field.core)
     _game.spawn = vector.new{4, 17}
     _game.delay = .75
     _game.locks = 8
-    _game.velocity = vector.new{.20, .05}
+    _game.velocity = vector.new{.175, .05}
 
     -- Should i put this data in a seperate class?
     _game.tetrominos = tetris.tetromino.array.new()

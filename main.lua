@@ -9,7 +9,7 @@
     spacebar64:
 
 	TODO: Random Generator Beta
-		No streaks of s or z greater than four
+		No streaks of s or z greater than four.  Intrisic property of the bag.  Checks are not needed.
 		I appears at least every 12 pieces
 		Randomly selects from bag of 7
 	TODO: Show held piece and next pieces
@@ -25,7 +25,7 @@ tetris = {
 
 math.randomseed(love.timer.getTime())
 love.keyboard.setKeyRepeat(true)
-
+print("Tetris Game")
 game = tetris.game.new()
 
 function love.draw()

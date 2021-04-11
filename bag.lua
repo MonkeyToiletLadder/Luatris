@@ -25,8 +25,6 @@ bag.__index = bag
 function bag.new()
     local _bag = {}
 
-    -- _bag.bag_resets = 0
-    -- _bag.sz_streak = 0
     _bag.i_absence = 0
     _bag.pieces = {}
 
@@ -37,43 +35,27 @@ function bag:fill()
         table.insert(self.pieces, v)
     end
     print("fill bag")
-    -- self.bag_resets = self.bag_resets + 1
 end
 function bag:draw()
     print("draw" .. love.timer.getTime())
     if #self.pieces == 0 then
-        print("NO PIECES")
         return nil
     end
     if self.i_absence > 12 then
         self.i_absence = 0
+        print(self.pieces[candidate])
         return table.remove(self.pieces, find(self.pieces, tetris.tetromino.shape.i))
     end
 
     local candidate = math.random(1, #self.pieces)
     if self.pieces[candidate] == tetris.tetromino.shape.i then
         self.i_absence = 0
+        print(self.pieces[candidate])
         return table.remove(self.pieces, candidate)
     else
         self.i_absence = self.i_absence + 1
     end
-    -- if self.bag_resets > 2 then
-    --     self.sz_streak = 0
-    --     self.bag_resets = 0
-    -- end
-    -- if self.pieces[candidate] == tetris.tetromino.shape.s or self.pieces[candidate] == tetris.tetromino.shape.z then
-    --     self.sz_streak = self.sz_streak + 1
-    -- end
-    -- NOTE: this is an intrisic property of the bag this is not needed :D Yay
-    -- if self.sz_streak > 4 then
-    --     print("after sz streak")
-    --     self.sz_streak = 0 -- sz_streak - 1
-    --     for i, v in ipairs(self.pieces) do
-    --         if v ~= tetris.tetromino.shape.s and v ~= tetris.tetromino.shape.z then
-    --             return table.remove(self.pieces, i)
-    --         end
-    --     end
-    -- end
+    print(self.pieces[candidate])
     return table.remove(self.pieces, candidate)
 end
 
