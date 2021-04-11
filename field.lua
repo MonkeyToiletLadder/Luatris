@@ -128,9 +128,6 @@ function field.background.new(core)
     local _background = {}
     _background.core = core
     _background.core.background = _background
-    _background.image = love.graphics.newImage("samus.png")
-    local image = _background.image
-    _background.quad = love.graphics.newQuad(0, 0, image:getWidth(), image:getHeight(), image:getWidth(), image:getHeight())
     return setmetatable(_background, field.background)
 end
 function field.background:draw()
