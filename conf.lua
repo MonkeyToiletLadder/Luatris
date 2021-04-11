@@ -1,5 +1,5 @@
 function love.conf(t)
-    t.window.width = 12 * 32
+    t.window.width = 17 * 32
     t.window.height = 22 * 32
     t.window.icon = "skull.png"
     t.window.title = "Luatris"

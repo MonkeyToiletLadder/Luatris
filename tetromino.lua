@@ -129,7 +129,6 @@ tetromino.bitarrays = {
 		{0,0,0},
 	},
 	{
-		{0,0,0,0},
 		{0,1,1,0},
 		{0,1,1,0},
 		{0,0,0,0},
@@ -476,7 +475,7 @@ function tetromino.piece:update()
 		self:rotate(tetromino.direction.right)
 	end
 	if love.keyboard.isDown("down") then
-		self.modifier = 10
+		self.modifier = 20
 	else
 		self.modifier = 1
 	end

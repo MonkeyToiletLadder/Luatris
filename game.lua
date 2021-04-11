@@ -23,7 +23,7 @@ function game.new()
     local hidden = 20
     local width = 10
     local height = 40
-    local scale = 1
+    local scale = 2
 
     local count = 0
     for _, _ in pairs(tetris.tetromino.shape) do
@@ -42,14 +42,14 @@ function game.new()
     _game.field.grid = tetris.field.grid.new(_game.field.core)
 
     _game.preview = {}
-    _game.preview.core = tetris.preview.core.new(array, vector.new{_game.field.core.border.width, 0}, blocksize, 4, 4*5, scale)
+    _game.preview.core = tetris.preview.core.new(array, vector.new{_game.field.core.border.width * scale, 0}, blocksize, 4, 4*5, scale)
     _game.preview.background = tetris.preview.background.new(_game.preview.core)
-    _game.preview.border = tetris.preview.border.new(_game.preview.core, love.graphics.newImage("border.png"), 16, 16)
+    _game.preview.border = tetris.preview.border.new(_game.preview.core, love.graphics.newImage("preview_border.png"), 0, 16)
 
-    _game.spawn = vector.new{4, 18}
+    _game.spawn = vector.new{4, 21}
     _game.delay = .75
     _game.locks = 8
-    _game.velocity = vector.new{.175, .05}
+    _game.velocity = vector.new{.185, .020}
 
     _game.ntetrominos = count
     _game.store = nil
@@ -122,16 +122,20 @@ function game:update()
 end
 function game:draw()
 	love.graphics.clear(0,0,0)
+
     self.field.border:draw()
     self.field.background:draw()
     self.field.grid:draw()
 	self.field.core:draw()
+
 	if self.current_tetromino and self.current_tetromino.alive then
 		self.current_tetromino:draw()
 	end
-    -- self.preview.border:draw()
+
+    self.preview.border:draw()
     self.preview.background:draw()
     self.preview.core:draw()
+
 	love.graphics.setColor(1,1,1)
 	love.graphics.print("score: " .. self.score, 0, self.field.core.blocksize * 20)
 end
