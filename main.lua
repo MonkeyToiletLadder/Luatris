@@ -16,6 +16,7 @@
 	TODO: quick drop and highlight contact area (need lowest points structure)
 	TODO: add controller support.
 	TODO: Add settings and sensitivities
+	TODO: Get beta testers
 ]]
 
 tetris = {

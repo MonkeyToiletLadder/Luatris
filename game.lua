@@ -31,9 +31,9 @@ function game.new()
     _game.bag = tetris.bag.new()
     _game.score = 0
     _game.field = {}
-    _game.field.core = tetris.field.core.new(vector.new{0, 0}, blocksize, hidden, width, height)
+    _game.field.core = tetris.field.core.new(vector.new{20, 20}, blocksize, hidden, width, height, .5)
     _game.field.background = tetris.field.background.new(_game.field.core)
-    _game.field.border = tetris.field.border.new(_game.field.core)
+    _game.field.border = tetris.field.border.new(_game.field.core, love.graphics.newImage("samus.png"), 1, 1, 1)
     _game.field.grid = tetris.field.grid.new(_game.field.core)
     _game.spawn = vector.new{4, 17}
     _game.delay = .75
@@ -113,13 +113,13 @@ function game:update()
 end
 function game:draw()
 	love.graphics.clear(0,0,0)
+    self.field.border:draw()
     self.field.background:draw()
 	self.field.core:draw()
 	if self.current_tetromino and self.current_tetromino.alive then
 		self.current_tetromino:draw()
 	end
 	self.field.grid:draw()
-	self.field.border:draw()
 	love.graphics.setColor(1,1,1)
 	love.graphics.print("score: " .. self.score, 0, self.field.core.blocksize * 20)
 end

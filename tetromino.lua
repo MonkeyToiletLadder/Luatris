@@ -497,15 +497,23 @@ function tetromino.piece:update()
 	end
 end
 function tetromino.piece:draw()
-    local blocksize = self.field.blocksize
+    local blocksize = self.field:get_block_size()
     local offset = self.field.position
     local state = tetromino.rotations[self.shape][self.rotation]
     local position = self.position
     love.graphics.setColor(tetromino.colors[self.shape])
 	for j in ipairs(state) do
 		for i in ipairs(state[j]) do
-			if state[j][i] ~= 0 then
-				love.graphics.draw(self.block, self.quad, offset[1] + (i + math.floor(position[1]) - 2) * blocksize, offset[2] + (j + math.floor(position[2]) - 2) * blocksize)
+			if state[j][i] ~= 0 and j - 1 + math.floor(position[2]) > self.field.hidden then
+				love.graphics.draw(
+					self.block,
+					self.quad,
+					offset[1] + (i + math.floor(position[1]) - 2) * blocksize,
+					offset[2] + (j + math.floor(position[2]) - 2) * blocksize,
+					0,
+					self.field.scale,
+					self.field.scale
+				)
 			end
 		end
 	end
@@ -526,5 +534,9 @@ end
 function tetromino.array:push(piece)
 	table.insert(self.pieces, piece)
 end
+
+tetromino.preview = {}
+tetromino.preview.__index = tetromino.preview
+
 
 return tetromino
