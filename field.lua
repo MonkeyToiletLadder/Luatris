@@ -134,7 +134,6 @@ function field.background:draw()
     local offset = self.core:get_inner_position()
     local blocksize = self.core:get_block_size()
     love.graphics.setColor(0,0,0)
-    -- love.graphics.draw(self.image, self.quad, position[1], position[2], 0, (self.core.width * self.core.blocksize) / self.image:getWidth(), ((self.core.height - self.core.hidden) * self.core.blocksize) / self.image:getHeight())
     love.graphics.rectangle(
         "fill",
         offset[1],

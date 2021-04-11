@@ -256,9 +256,6 @@ function tetromino.piece:get_next_rotation(direction)
     if rotation < 1 then rotation = rotation + 4 end
     return rotation
 end
-function tetromino.piece:get_state()
-    return tetromino.rotations[self.shape][self:get_rotation()]
-end
 function tetromino.piece:set_next_rotation(direction)
     self.rotation = self:get_next_rotation(direction)
 end
@@ -310,6 +307,7 @@ function tetromino.piece:drop()
     end
 
     local state = tetromino.rotations[self.shape][self.rotation]
+	-- could only test bottom most points instead of whole array but considering pieces arent that big its no big deal
     local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then

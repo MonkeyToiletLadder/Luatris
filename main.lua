@@ -17,6 +17,7 @@
 	TODO: add controller support.
 	TODO: Add settings and sensitivities
 	TODO: Get beta testers
+	TODO: Code review
 ]]
 
 tetris = {

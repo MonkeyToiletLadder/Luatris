@@ -46,7 +46,7 @@ function game.new()
     _game.preview.background = tetris.preview.background.new(_game.preview.core)
     _game.preview.border = tetris.preview.border.new(_game.preview.core, love.graphics.newImage("border.png"), 16, 16)
 
-    _game.spawn = vector.new{4, 17}
+    _game.spawn = vector.new{4, 18}
     _game.delay = .75
     _game.locks = 8
     _game.velocity = vector.new{.175, .05}
@@ -124,6 +124,7 @@ function game:draw()
 	love.graphics.clear(0,0,0)
     self.field.border:draw()
     self.field.background:draw()
+    self.field.grid:draw()
 	self.field.core:draw()
 	if self.current_tetromino and self.current_tetromino.alive then
 		self.current_tetromino:draw()
