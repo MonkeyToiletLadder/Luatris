@@ -7,6 +7,7 @@
 
 local matrix = require "matrix"
 local vector = require "vector"
+local input = require "input"
 
 local function get_rotations(bitarray)
 	bitarray = matrix.new(bitarray)
@@ -169,52 +170,60 @@ tetromino.boundaries = {
 }
 -- The wikis chart has 1 for up and -1 for down while this chart is the inverse
 tetromino.wallkicktests_jlstz = {
-    { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
-    { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
-    { 0, 0, 1, 0, 1, 1, 0,-2, 1,-2},
-    { 0, 0,-1, 0,-1,-1, 0, 2,-1, 2},
-    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
-    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
-    { 0, 0,-1, 0,-1, 1, 0,-2,-1,-2},
-    { 0, 0, 1, 0, 1,-1, 0, 2, 1, 2},
+	--            VVVV extra test for when on floor
+    { 0, 0,-1, 0, 0,-1,-1,-1, 0, 2,-1, 2},
+    { 0, 0, 1, 0, 0, 1, 1, 1, 0,-2, 1,-2},
+    { 0, 0, 1, 0, 0, 1, 1, 1, 0,-2, 1,-2},
+    { 0, 0,-1, 0, 0,-1,-1,-1, 0, 2,-1, 2},
+    { 0, 0, 1, 0, 0,-1, 1,-1, 0, 2, 1, 2},
+    { 0, 0,-1, 0, 0, 1,-1, 1, 0,-2,-1,-2},
+    { 0, 0,-1, 0, 0, 1,-1, 1, 0,-2,-1,-2},
+    { 0, 0, 1, 0, 0,-1, 1,-1, 0, 2, 1, 2},
 }
 tetromino.wallkicktests_i = {
-    { 0, 0,-2, 0, 1, 0,-2, 1, 1,-2},
-    { 0, 0, 2, 0,-1, 0, 2,-1,-1, 2},
-    { 0, 0,-1, 0, 2, 0,-1,-2, 2, 1},
-    { 0, 0, 1, 0,-2, 0, 1, 2,-2,-1},
-    { 0, 0, 2, 0,-1, 0, 2,-1,-1, 2},
-    { 0, 0,-2, 0, 1, 0,-2, 1, 1,-2},
-    { 0, 0, 1, 0,-2, 0, 1, 2,-2,-1},
-    { 0, 0,-1, 0, 2, 0,-1,-2, 2, 1},
+	--            VVVV extra test for when on floor
+    { 0, 0,-2, 0, 0, 1, 1, 0,-2, 1, 1,-2},
+    { 0, 0, 2, 0, 0,-1,-1, 0, 2,-1,-1, 2},
+    { 0, 0,-1, 0, 0, 2, 2, 0,-1,-2, 2, 1},
+    { 0, 0, 1, 0, 0,-2,-2, 0, 1, 2,-2,-1},
+    { 0, 0, 2, 0, 0,-1,-1, 0, 2,-1,-1, 2},
+    { 0, 0,-2, 0, 0, 1, 1, 0,-2, 1, 1,-2},
+    { 0, 0, 1, 0, 0, 2,-2, 0, 1, 2,-2,-1},
+    { 0, 0,-1, 0, 0,-2, 2, 0,-1,-2, 2, 1},
 }
 
 tetromino.piece = {}
 tetromino.piece.__index = tetromino.piece
 function tetromino.piece.new(
     field,
+	input_manager,
     shape,
     position,
     rotation,
-    velocity,
     locks,
-    delay)
+    lock_delay,
+	drop_delay,
+	move_delay
+)
 	local _piece = {
+		input_manager = input_manager,
 		field = field,
 		shape = shape,
 		position = vector.new{position[1], position[2]},
 		rotation = rotation,
-		velocity = vector.new{velocity[1], velocity[2]},
-		modifier = 1,
 		touching = false,
 		locks = locks,
-		lock_delay = delay,
-		lock_timer = 0,
+		lock_delay = lock_delay,
+		lock_timer = love.timer.getTime(),
+		drop_modifier = drop_delay or .75,
+		drop_delay = drop_delay or .75,
+		drop_timer = love.timer.getTime(),
+		move_delay = move_delay or .075,
+		move_timer = love.timer.getTime(),
 		alive = true,
 		block = love.graphics.newImage("blocks.png"),
-		rotation_delay = .175,
+		rotation_delay = .075,
 		rotation_timer = 0,
-		last_block = position[1],
 	}
 	_piece.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _piece.block:getWidth(), _piece.block:getWidth())
 	local _piece = setmetatable(_piece, tetromino.piece)
@@ -293,7 +302,7 @@ function tetromino.piece:drop()
         self.position[1],
         self.position[2],
     }
-    test[2] = math.floor(test[2] + 1)
+    test[2] = test[2] + 1
 
     local should_drop = true
 
@@ -307,7 +316,7 @@ function tetromino.piece:drop()
 
     local state = tetromino.rotations[self.shape][self.rotation]
 	-- could only test bottom most points instead of whole array but considering pieces arent that big its no big deal
-    local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    local overlap = matrix.intersect(state, self.field, test, vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
     if overlap then
         if not self.touching then
             self.lock_timer = love.timer.getTime()
@@ -320,35 +329,10 @@ function tetromino.piece:drop()
         -- The speed of a tetromino is maxed at 1 to prevent complex collision logic
         -- Basically the tetromino would need to be tested at all the points between the next state and the starting state
         -- The speed of a tetromino probably doesnt need to exceed 1 anyways
-        self.position[2] = self.position[2] + math.min(self.velocity[2] * self.modifier, 1)
-    end
-
-    test = vector.new{
-        self.position[1],
-        self.position[2],
-    }
-    test[2] = math.floor(test[2] + 1)
-
-    -- test below the piece again to see if its touching the floor or another tetromino
-    if test[2] > self:get_lower_bound(self.rotation) then
-        if not self.touching then
-            self.lock_timer = love.timer.getTime()
-            self.touching = true
-        end
-    end
-
-    overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
-    if overlap then
-        if not self.touching then
-            self.lock_timer = love.timer.getTime()
-            self.touching = true
-        end
+        self.position[2] = self.position[2] + 1
     end
 end
 function tetromino.piece:rotate(direction)
-	if love.timer.getTime() - self.rotation_timer <= self.rotation_delay then
-		return
-	end
     if self.locks <= 0 then
         return
     end
@@ -370,23 +354,24 @@ function tetromino.piece:rotate(direction)
         test[2] = test[2] + tests[j]
 
         local should_move = true
-        if math.floor(test[1]) < self:get_left_bound(rotation) then
+        if test[1] < self:get_left_bound(rotation) then
             should_move = false
         end
-        if math.floor(test[1]) > self:get_right_bound(rotation) then
+        if test[1] > self:get_right_bound(rotation) then
             should_move = false
         end
-        if math.floor(test[2]) > self:get_lower_bound(rotation) then
+        if test[2] > self:get_lower_bound(rotation) then
             should_move = false
         end
 
-        local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+        local overlap = matrix.intersect(state, self.field, test, vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
         if overlap then
             should_move = false
         end
 
         if should_move then
+			print(tests[i], tests[j])
             if self.touching then
                 self.locks = self.locks - 1
                 self.touching = false
@@ -407,9 +392,9 @@ function tetromino.piece:move(direction)
     local step = 0
 
     if direction == tetromino.direction.left then
-        step = -1 * self.velocity[1]
+        step = -1
     elseif direction == tetromino.direction.right then
-        step = 1 * self.velocity[1]
+        step = 1
     end
 
     local rotation = self:get_rotation()
@@ -423,17 +408,16 @@ function tetromino.piece:move(direction)
 
     local state = tetromino.rotations[self.shape][rotation]
 
-    local overlap = matrix.intersect(state, self.field, test:to_veci(), vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    local overlap = matrix.intersect(state, self.field, test, vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
 
     if overlap then
         should_move = false
     end
 
-    if self.touching and self.last_block ~= math.floor(self.position[1]) then
+    if self.touching then
         self.locks = self.locks - 1
 		self.touching = false
 		self.lock_timer = 0
-		self.last_block = math.floor(self.position[1])
     end
 	if should_move then
     	self.position[1] = test[1]
@@ -462,24 +446,50 @@ function tetromino.piece:insert()
 	end
 end
 function tetromino.piece:update()
-	if love.keyboard.isDown("left") then
+	if self.input_manager:is_down("left", self.move_delay) then
 		self:move(tetromino.direction.left)
 	end
-	if love.keyboard.isDown("right") then
+	if self.input_manager:is_down("right", self.move_delay) then
 		self:move(tetromino.direction.right)
 	end
-	if love.keyboard.isDown("a") then
+	if self.input_manager:is_down("a", self.rotation_delay, .15) then
 		self:rotate(tetromino.direction.left)
 	end
-	if love.keyboard.isDown("s") then
+	if self.input_manager:is_down("s", self.rotation_delay, .15) then
 		self:rotate(tetromino.direction.right)
 	end
-	if love.keyboard.isDown("down") then
-		self.modifier = 20
+	if self.input_manager:is_down("down") then
+		self.drop_modifier = self.drop_delay * 20
 	else
-		self.modifier = 1
+		self.drop_modifier = self.drop_delay
 	end
-	self:drop()
+	if love.timer.getTime() - self.drop_timer > self.drop_delay / self.drop_modifier then
+		self:drop()
+		self.drop_timer = love.timer.getTime()
+	end
+	test = vector.new{
+        self.position[1],
+        self.position[2],
+    }
+    test[2] = test[2] + 1
+
+    -- test below the piece again to see if its touching the floor or another tetromino
+    if test[2] > self:get_lower_bound(self.rotation) then
+        if not self.touching then
+            self.lock_timer = love.timer.getTime()
+            self.touching = true
+        end
+    end
+
+
+    local state = tetromino.rotations[self.shape][self.rotation]
+    local overlap = matrix.intersect(state, self.field, test, vector.new{1, 1}, function(a, b) return a > 0 and b > 0 end)
+    if overlap then
+        if not self.touching then
+            self.lock_timer = love.timer.getTime()
+            self.touching = true
+        end
+    end
 	if self.touching and love.timer.getTime() - self.lock_timer > self.lock_delay then
 		self:insert()
 		local rows = 0
@@ -503,13 +513,13 @@ function tetromino.piece:draw()
     love.graphics.setColor(tetromino.colors[self.shape])
 	for j in ipairs(state) do
 		for i in ipairs(state[j]) do
-			if state[j][i] ~= 0 and j - 1 + math.floor(position[2]) > self.field.hidden then
+			if state[j][i] ~= 0 and j - 1 + position[2] > self.field.hidden then
 				k = j - self.field.hidden
 				love.graphics.draw(
 					self.block,
 					self.quad,
-					offset[1] + (i + math.floor(position[1]) - 2) * blocksize,
-					offset[2] + (k + math.floor(position[2]) - 2) * blocksize,
+					offset[1] + (i + position[1] - 2) * blocksize,
+					offset[2] + (k + position[2] - 2) * blocksize,
 					0,
 					self.field.scale,
 					self.field.scale

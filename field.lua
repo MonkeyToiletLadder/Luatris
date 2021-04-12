@@ -4,8 +4,7 @@
     author: vaxeral
     april 1 2021
 
-    Figuring out the position of the fields components ie (borders and core) is a lil tricky
-    you need to know the border width(margin).
+
 ]]
 
 tetromino = require "tetromino"
@@ -65,7 +64,7 @@ function field.core:get_outer_position()
     return self.position + vector.new{0, self.hidden * self:get_block_size()}
 end
 function field.core:get_inner_position()
-    return self.position + vector.new{self.border:get_left_margin(), self.hidden * self.blocksize * self.scale + self.border:get_top_margin()}
+    return self:get_outer_position() + vector.new{self.border:get_left_margin(), self.border:get_top_margin()}
 end
 function field.core:set_position(position)
     self.position = position - vector.new{0, self.hidden * self.blocksize * self.scale}

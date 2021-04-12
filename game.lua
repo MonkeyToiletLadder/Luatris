@@ -3,9 +3,12 @@
     luatris version 0.1.0
     author: vaxeral
     april 8 2021
+
+    make labels to put in places
 ]]
 
 local vector = require "vector"
+local input = require "input"
 
 local tetris = {
     field = require "field",
@@ -54,6 +57,9 @@ function game.new()
     _game.ntetrominos = count
     _game.store = nil
     _game.current_tetromino = false
+
+    _game.input_manager = input.manager.new()
+
     _game = setmetatable(_game, game)
 
     _game.bag:fill()
@@ -70,10 +76,10 @@ function game:new_tetromino()
     self.preview.core:push(self.bag:draw())
     return tetris.tetromino.piece.new(
                 self.field.core,
+                self.input_manager,
                 self.preview.core:pop_front(),
                 self.spawn,
                 tetris.tetromino.rotation.right_side_up,
-                self.velocity,
                 self.locks,
                 self.delay
             )
@@ -109,6 +115,7 @@ function game:update()
             self.field.core.onstack = false
         end
     end
+    self.input_manager:update()
 	if self.current_tetromino.alive then
 		self.current_tetromino:update()
 	end
