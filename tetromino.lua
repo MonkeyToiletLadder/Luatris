@@ -445,10 +445,10 @@ function tetromino.piece:insert()
 	end
 end
 function tetromino.piece:update()
-	if self.input_manager:is_down("left", 0, self.move_delay) then
+	if self.input_manager:is_down("left", .05, self.move_delay) then
 		self:move(tetromino.direction.left)
 	end
-	if self.input_manager:is_down("right", 0, self.move_delay) then
+	if self.input_manager:is_down("right", .05, self.move_delay) then
 		self:move(tetromino.direction.right)
 	end
 	if self.input_manager:is_down("a", 0, self.rotation_delay) then
