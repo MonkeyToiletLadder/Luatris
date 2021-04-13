@@ -218,11 +218,11 @@ function tetromino.piece.new(
 		drop_modifier = drop_delay or .75,
 		drop_delay = drop_delay or .75,
 		drop_timer = love.timer.getTime(),
-		move_delay = move_delay or .075,
+		move_delay = move_delay or .08,
 		move_timer = love.timer.getTime(),
 		alive = true,
 		block = love.graphics.newImage("blocks.png"),
-		rotation_delay = .075,
+		rotation_delay = .175,
 		rotation_timer = 0,
 	}
 	_piece.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _piece.block:getWidth(), _piece.block:getWidth())
@@ -371,7 +371,6 @@ function tetromino.piece:rotate(direction)
         end
 
         if should_move then
-			print(tests[i], tests[j])
             if self.touching then
                 self.locks = self.locks - 1
                 self.touching = false
@@ -446,16 +445,16 @@ function tetromino.piece:insert()
 	end
 end
 function tetromino.piece:update()
-	if self.input_manager:is_down("left", self.move_delay) then
+	if self.input_manager:is_down("left", 0, self.move_delay) then
 		self:move(tetromino.direction.left)
 	end
-	if self.input_manager:is_down("right", self.move_delay) then
+	if self.input_manager:is_down("right", 0, self.move_delay) then
 		self:move(tetromino.direction.right)
 	end
-	if self.input_manager:is_down("a", self.rotation_delay, .15) then
+	if self.input_manager:is_down("a", 0, self.rotation_delay) then
 		self:rotate(tetromino.direction.left)
 	end
-	if self.input_manager:is_down("s", self.rotation_delay, .15) then
+	if self.input_manager:is_down("s", 0, self.rotation_delay) then
 		self:rotate(tetromino.direction.right)
 	end
 	if self.input_manager:is_down("down") then
