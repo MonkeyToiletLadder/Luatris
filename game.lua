@@ -50,7 +50,7 @@ function game.new()
     _game.preview.border = tetris.preview.border.new(_game.preview.core, love.graphics.newImage("preview_border.png"), 0, 16)
 
     _game.spawn = vector.new{4, 21}
-    _game.delay = .75
+    _game.delay = .575
     _game.locks = 8
     _game.velocity = vector.new{.185, .020}
 

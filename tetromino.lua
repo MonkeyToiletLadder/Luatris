@@ -218,11 +218,11 @@ function tetromino.piece.new(
 		drop_modifier = drop_delay or .75,
 		drop_delay = drop_delay or .75,
 		drop_timer = love.timer.getTime(),
-		move_delay = move_delay or .08,
+		move_delay = move_delay or .125,
 		move_timer = love.timer.getTime(),
 		alive = true,
 		block = love.graphics.newImage("blocks.png"),
-		rotation_delay = .175,
+		rotation_delay = .195,
 		rotation_timer = 0,
 	}
 	_piece.quad = love.graphics.newQuad(0, 0, field.blocksize, field.blocksize, _piece.block:getWidth(), _piece.block:getWidth())
@@ -445,10 +445,10 @@ function tetromino.piece:insert()
 	end
 end
 function tetromino.piece:update()
-	if self.input_manager:is_down("left", .05, self.move_delay) then
+	if self.input_manager:is_down("left", 0, self.move_delay) then
 		self:move(tetromino.direction.left)
 	end
-	if self.input_manager:is_down("right", .05, self.move_delay) then
+	if self.input_manager:is_down("right", 0, self.move_delay) then
 		self:move(tetromino.direction.right)
 	end
 	if self.input_manager:is_down("a", 0, self.rotation_delay) then
