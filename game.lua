@@ -64,7 +64,7 @@ function game.new()
 
     _game.bag:fill()
 
-    for i = 1, 5, 1 do
+    for i = 1, 3, 1 do
         _game.preview.core:push(_game.bag:draw())
     end
 
